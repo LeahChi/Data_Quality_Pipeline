@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+
+<h1>Data quality issues and profiling of a private water supplies dataset</h1>
+
+<h2>Introduction</h2>
+
+<p>This report has been produced by applying the vizdataquality package to investigate data quality of a dataset about private water supplies in Leeds. The data is from Data Mill North and is used here to evaluate Steps 1–4 of Roy Ruddle’s structured profiling workflow.</p>
+
+<p>The first four workflow steps investigate data quality and clean the dataset in a structured manner.</p>
+
+<h2>Step 1: Look at your data (is anything obviously wrong?)</h2>
+
+<p>The dataset is a narrow, record-based table (16 rows × 5 columns), with one row per private water supply. All variables are text-based and fully populated (0 missing values). No data type conflicts were detected. Unlike wide time-series datasets, no structural empty columns were present, so no cleaning was required prior to subsequent workflow steps.</p>
+
+<h2>Step 2: Watch out for special values</h2>
+
+<p>All variables are text-based, so numeric sentinel checks were not applicable. Text columns were scanned for blank strings, whitespace-only entries, and common textual sentinel encodings (e.g., 'n/a', 'unknown', 'null'), using case-insensitive comparison. No such encodings were detected. Missing values appear consistently absent and no recoding was required.</p>
+
+<h2>Step 3: Is any data missing?</h2>
+
+<p>Following structural checks (Step 1) and encoded missingness checks (Step 2), no variables contain missing values. The dataset is fully populated across all attributes. Although no missingness is present, further validation (Step 4) is still required to assess correctness and consistency.</p>
+
+<h2>Step 4: Check each variable</h2>
+
+<p>Variable-level validation was conducted to assess whether each attribute behaves consistently with domain expectations. One postcode failed format validation due to inconsistent spacing, and three OS Grid References did not match the expected coordinate pattern. Whitespace inconsistencies were also detected in text fields, and the 'Type of Water Use' column showed closely related but non-identical categories ('Commercial' and 'Commercial/Large'). This indicates that, although the dataset contains no missing values, format and standardisation issues remain. The results reinforce the need for type-aware validation and normalisation logic in a generalisable profiling pipeline.</p>
+
+</html>
+</body>

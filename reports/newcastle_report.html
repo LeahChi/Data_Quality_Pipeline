@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+
+<h1>Data quality issues and profiling of a Nwecastle library loan dataset</h1>
+
+<h2>Introduction</h2>
+
+<p>This report has been produced by applying the vizdataquality package to investigate data quality of a dataset about Monthly loan figures of Newcastle libraries. The data is (c) Newcastle City Council, https://datamillnorth.org/dataset/newcastle-libraries-loans-e6qw9 ..</p>
+
+<p>The first 4 workflow steps investigate data quality and clean it in a structured manner.</p>
+
+<h2>Step 1: Look at your data (is anything obviously wrong?)</h2>
+
+<p>The dataset is in a wide table format (rows=libraries, columns=months). I detected 7 columns with 100% missingness (missing fraction = 1.0), which correspond to trailing time periods.These are treated as structural placeholders for profiling and removed before Steps 2–4 to prevent distorted summaries and unreadable plots. </p>
+
+<h2>Step 2: Watch out for special values</h2>
+
+<p>Numeric variables were scanned for common sentinel encodings (e.g., -999, -1, 999, 9999).One occurrence of value 999 was detected (Cruddas Park, 2011-05), but inspection confirmed this represents a plausible loan count rather than a placeholder encoding. Text variables were checked case-insensitively for common placeholder tokens (e.g., 'n/a', 'unknown', 'null'), and none were found. Missing values appear to be consistently encoded as NaN. No recoding was required before proceeding.</p>
+
+<h2>Step 3: Is any data missing?</h2>
+
+<p>Following the removal of structural all-missing columns in Step 1 and verification of sentinel encodings in Step 2, no remaining variables contain missing values. All monthly loan counts are complete for the retained time periods. The dataset is therefore suitable for variable-level validation without further imputation.</p>
+
+<h2>Step 4: Check each variable</h2>
+
+<p>Library identifiers were confirmed to be unique, with no duplicate names detected. Monthly loan variables contain no negative or non-integer values. Loan counts range from 0 to 56,618 across the dataset, with peak activity occurring between 2009–2010. Several months in 2020 exhibit substantially reduced average loan volumes, consistent with temporary operational disruptions rather than data error. No implausible extreme values or constant columns were identified.</p>
+
+</html>
+</body>
