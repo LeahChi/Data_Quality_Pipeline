@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-11T14:40:43.063703",
+  "generated_at": "2026-03-29T19:27:00.964979",
   "dataset": "Newcastle Library Loans",
   "structure": {
     "num_rows": 19,
@@ -4894,6 +4894,7 @@
   },
   "validation": {
     "rules_applied": [
+      "rule_category_consistency",
       "rule_no_negatives",
       "rule_no_constant_columns",
       "rule_integers_only"

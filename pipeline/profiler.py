@@ -26,7 +26,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 from .loader import LoadResult
 
-
 # Sentinel values to scan for, derived from exploratory analysis.
 # The pipeline doesn't delete these, only flags them for contextual review.
 NUMERIC_SENTINELS = [-999, -1, 999, 9999]
@@ -59,6 +58,8 @@ class ProfileResult:
     complete_cols: list             # 0% missing
     partial_cols: list              # some missing
     column_profiles: list           # list of ColumnProfile
+    duplicate_count: int = 0
+    fully_blank_rows: int = 0
     warnings: list = field(default_factory=list)
 
     @property
@@ -230,8 +231,21 @@ def profile(load_result: LoadResult) -> ProfileResult:
             f"These are excluded from downstream validation steps."
         )
 
-    # Every following module (missing.py, validator.py, report.py)
-    #  has everything it needs without re-computing anything.
+    # Duplicate row detection — excludes fully blank rows
+    fully_blank_rows = int(df.isna().all(axis=1).sum())
+    df_non_blank = df.dropna(how="all")
+    duplicate_count = int(df_non_blank.duplicated().sum())
+
+    if fully_blank_rows > 0:
+        warnings.append(f"{fully_blank_rows} fully blank row(s) detected.")
+
+    if duplicate_count > 0:
+        examples = df_non_blank[df_non_blank.duplicated(keep=False)].head(3).to_dict(orient="records")
+        warnings.append(f"{duplicate_count} duplicate row(s) detected (excluding blank rows). "
+        f"Examples: {examples}")
+
+    # Every following module (missing.py, validator.py, report.py) 
+    # has everything it needs without re-computing anything.
     return ProfileResult(
         dataset_name=load_result.dataset_name,
         num_rows=load_result.num_rows,
@@ -240,5 +254,7 @@ def profile(load_result: LoadResult) -> ProfileResult:
         complete_cols=complete_cols,
         partial_cols=partial_cols,
         column_profiles=profiles,
+        duplicate_count=duplicate_count,
+        fully_blank_rows=fully_blank_rows,
         warnings=warnings,
     )

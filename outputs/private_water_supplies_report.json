@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-10T15:35:04.297759",
+  "generated_at": "2026-03-29T19:27:50.906805",
   "dataset": "Private Water Supplies",
   "structure": {
     "num_rows": 16,
@@ -144,6 +144,7 @@
   },
   "validation": {
     "rules_applied": [
+      "rule_category_consistency",
       "valid_postcode",
       "valid_os_grid_ref"
     ],

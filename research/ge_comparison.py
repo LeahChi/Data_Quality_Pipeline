@@ -13,8 +13,7 @@ The purpose of this script:
 
 2. FORMAL COMPARISON (Chapter 4 — Evaluation):
    After the custom pipeline was built, both tools were run on the same
-   datasets and findings compared side by side. Results are documented
-   in Section 4.2.2.
+   datasets and findings compared side by side.
 
 Datasets evaluated:
     - Newcastle Library Loans (data/newcastle_loans.csv)

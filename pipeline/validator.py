@@ -101,6 +101,50 @@ def rule_integers_only(series: pd.Series, col_name: str) -> Optional[ValidationI
         )
     return None
 
+def rule_category_consistency(series: pd.Series, col_name: str) -> Optional[ValidationIssue]:
+    """
+    Flag columns where the same value appears in multiple case/whitespace variants.
+
+    For example: 'Yes', 'yes', 'YES', ' Yes' would all be flagged as
+    inconsistent representations of the same value. 
+    This is a representational data quality issue per Wang & Strong (1996).
+    """
+    if series.dtype != object:
+        # Only applies to text columns
+        return None
+
+    normalised = series.dropna().astype(str).str.strip().str.lower()
+    original = series.dropna().astype(str).str.strip()
+
+    # Group original values by their normalised form in a dictionary
+    """
+    "yes": {"Yes", "yes", "YES"},
+    "no":  {"No"} 
+    """
+    groups = {}
+    for norm, orig in zip(normalised, original):
+        if norm not in groups:
+            groups[norm] = set()
+        groups[norm].add(orig)
+
+    # Flag any normalised value that maps to more than 1 original form
+    inconsistent = {k: list(v) for k, v in groups.items() if len(v) > 1}
+
+    if inconsistent:
+        examples = list(inconsistent.values())[:3]
+        count = sum(len(v) for v in inconsistent.values())
+        return ValidationIssue(
+            column=col_name,
+            rule_name="category_consistency",
+            severity="warning",
+            message=(
+                f"Category inconsistency detected — same value appears in multiple "
+                f"forms. Examples: {examples}"
+            ),
+            affected_count=count,
+        )
+    return None
+
 
 def make_regex_rule(
     pattern: str,
@@ -172,7 +216,7 @@ rule_valid_os_grid_ref = make_regex_rule(
 
 # Default rule sets applied by column dtype
 DEFAULT_NUMERIC_RULES = [rule_no_negatives, rule_no_constant_columns, rule_integers_only]
-DEFAULT_TEXT_RULES = []  # Format rules are dataset-specific — passed in per run
+DEFAULT_TEXT_RULES = [rule_category_consistency]  # Format rules are dataset-specific — passed in per run
 
 
 def validate(
@@ -225,6 +269,16 @@ def validate(
                     result.issues.append(issue)
                 if rule.__name__ not in result.rules_applied:
                     result.rules_applied.append(rule.__name__)
+
+        # Apply default text rules to all text columns
+        if series.dtype == object:
+            for rule in DEFAULT_TEXT_RULES:
+                issue = rule(series, col)
+            if issue:
+                result.issues.append(issue)
+            if rule.__name__ not in result.rules_applied:
+                result.rules_applied.append(rule.__name__)
+        
 
         # Apply column-specific text rules
         if col in text_rules:
