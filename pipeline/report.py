@@ -12,7 +12,7 @@ from .missing import MissingnessResult
 from .validator import ValidationResult
 
 
-def generate_report(profiling_result, missingness_result, validation_result, output_dir="outputs", formats=None):
+def generate_report(profiling_result, missingness_result, validation_result, output_dir="outputs", formats=None, df=None):
     formats = formats or ["json", "html"]
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ def generate_report(profiling_result, missingness_result, validation_result, out
 
     if "html" in formats:
         path = output_path / f"{safe_name}_report.html"
-        _write_html(profiling_result, missingness_result, validation_result, path)
+        _write_html(profiling_result, missingness_result, validation_result, path, df = df)
         outputs["html"] = str(path)
 
     return outputs
@@ -96,8 +96,105 @@ def _severity_colour(s):
 def _missingness_colour(c):
     return {"structural": "#c0392b", "partial": "#e67e22", "complete": "#27ae60"}.get(c, "#7f8c8d")
 
+def _build_bar_chart(pr):
+    """
+    Build a Chart.js horizontal bar chart showing missingness % per column.
+    Shows top 20 columns with partial missingness, sorted descending.
+    Returns an HTML string containing a canvas element and inline JavaScript.
 
-def _write_html(pr, mr, vr, path):
+    Chart.js is loaded from a CDN — an internet connection is required
+    to render the chart when opening the HTML report in a browser.
+
+    Args:
+        pr: ProfileResult from profiler.profile()
+
+    Returns:
+        HTML string containing the chart canvas and script tags.
+    """
+    df = pr.profile_df
+
+    # Exclude structural columns (100% missing) — these are not meaningful
+    # for a missingness distribution chart as they are placeholders, not
+    # genuine data quality issues.
+    chartable = df[df["missingness_class"] == "partial"].copy()
+    chartable = chartable.sort_values("missing_fraction", ascending=False).head(20)
+
+    # If no partial missingness exists, return a success message instead
+    if chartable.empty:
+        return "<p style='color:#27ae60;font-weight:600;'>No partial missingness detected.</p>"
+
+    # Extract labels (column names), values (% missing), and colours
+    # Colours match the missingness classification badges used elsewhere in the report
+    labels = list(chartable["column"])
+    values = [round(float(v) * 100, 1) for v in chartable["missing_fraction"]]
+    colours = [
+        "#e67e22" if c == "partial" else "#27ae60"
+        for c in chartable["missingness_class"]
+    ]
+
+    # Serialise to JSON for injection into the JavaScript block
+    labels_json = json.dumps(labels)
+    values_json = json.dumps(values)
+    colours_json = json.dumps(colours)
+
+    return f"""
+    <!-- Missingness bar chart — rendered using Chart.js 4.4.0 via CDN -->
+    <!-- Requires internet connection to load the Chart.js library -->
+    <canvas id="missingnessChart" style="max-height:500px;"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script>
+    (function() {{
+        // Wrap in IIFE to avoid polluting global scope
+        var ctx = document.getElementById('missingnessChart').getContext('2d');
+        new Chart(ctx, {{
+            type: 'bar',
+            data: {{
+                labels: {labels_json},
+                datasets: [{{
+                    label: 'Missing %',
+                    data: {values_json},
+                    backgroundColor: {colours_json},
+                    borderRadius: 4,
+                }}]
+            }},
+            options: {{
+            // indexAxis: 'y' makes this a horizontal bar chart
+            // which is easier to read for long column names
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {{
+                // Hide the legend since colours are self-explanatory
+                    legend: {{ display: false }},
+                    tooltip: {{
+                        callbacks: {{
+                        // Format tooltip to show percentage
+                            label: function(context) {{
+                                return context.parsed.x.toFixed(1) + '% missing';
+                            }}
+                        }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        min: 0,
+                        max: 100,
+                        title: {{ display: true, text: 'Missing (%)' }},
+                        ticks: {{ callback: function(v) {{ return v + '%'; }} }}
+                    }},
+                    y: {{
+                        ticks: {{ font: {{ size: 11 }} }}
+                    }}
+                }}
+            }}
+        }});
+    }})();
+    </script>
+    <p style="font-size:0.78em;color:#999;margin-top:8px;">
+        Top 20 columns by missing fraction. Structural (100% missing) columns excluded.
+    </p>"""
+
+
+def _write_html(pr, mr, vr, path, df=None):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M")
     miss_map = {r.column: r for r in mr.column_results}
 
@@ -196,6 +293,8 @@ def _write_html(pr, mr, vr, path):
 </p>
 <h2>Dataset Overview</h2>
 <div class="cards">{cards}</div>
+<h2>Missingness Distribution</h2>
+{_build_bar_chart(pr)}
 <h2>Column Profiles</h2>
 <table>
 <thead>

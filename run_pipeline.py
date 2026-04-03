@@ -94,8 +94,7 @@ def main():
 
     outputs = generate_report(
         profiling_result, missingness_result, validation_result,
-        output_dir=args.output,
-    )
+        output_dir=args.output, df = load_result.df)
 
     print(f"\n{'='*60}")
     print(f"  Reports generated:")
