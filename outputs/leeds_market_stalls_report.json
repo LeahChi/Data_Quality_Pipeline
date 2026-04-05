@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-29T19:50:26.561154",
+  "generated_at": "2026-04-05T14:50:32.165624",
   "dataset": "Leeds Market Stalls",
   "structure": {
     "num_rows": 9999,
@@ -1131,14 +1131,14 @@
         "column": "Day",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['monday', 'Monday'], ['tuesday', 'Tuesday']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['monday', 'Monday'], ['Tuesday', 'tuesday']]",
         "affected_count": 4
       },
       {
         "column": "LEEDSTradingDay",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['y', 'Y']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['Y', 'y']]",
         "affected_count": 2
       },
       {
@@ -1173,7 +1173,7 @@
         "column": "PUDSEYTradingDay",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['N', 'n']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['n', 'N']]",
         "affected_count": 2
       },
       {
