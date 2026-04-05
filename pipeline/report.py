@@ -193,6 +193,177 @@ def _build_bar_chart(pr):
         Top 20 columns by missing fraction. Structural (100% missing) columns excluded.
     </p>"""
 
+def _build_data_preview(df):
+    """
+    Build a modal popup showing the raw dataset rows.
+
+    Displays first 20 rows and first 20 columns by default, with buttons
+    to expand to all rows and all columns. Returns empty string if df is None.
+
+    Args:
+        df: pandas DataFrame from loader.load_csv()
+
+    Returns:
+        HTML string containing the modal overlay and trigger button.
+    """
+    if df is None:
+        # If no dataframe was passed, hide the preview entirely
+        return ""
+
+    total_rows = len(df)
+    total_cols = len(df.columns)
+
+    # Default view — first 20 rows, first 20 columns
+    preview_rows = df.head(20)
+    preview_cols = list(df.columns[:20])
+
+    # Build table headers for default (20 col) view
+    default_headers = "".join(
+        f"<th>{col}</th>" for col in preview_cols
+    )
+
+    # Build table headers for all columns view
+    all_headers = "".join(
+        f"<th>{col}</th>" for col in df.columns
+    )
+
+    # Build table rows for default (20 col) view
+    default_rows = ""
+    for _, row in preview_rows.iterrows():
+        cells = "".join(
+            f"<td>{str(row[col]) if str(row[col]) != 'nan' else '—'}</td>"
+            for col in preview_cols
+        )
+        default_rows += f"<tr>{cells}</tr>\n"
+
+    # Build table rows for all columns view
+    all_rows = ""
+    for _, row in preview_rows.iterrows():
+        cells = "".join(
+            f"<td>{str(row[col]) if str(row[col]) != 'nan' else '—'}</td>"
+            for col in df.columns
+        )
+        all_rows += f"<tr>{cells}</tr>\n"
+
+    # Build all rows for default columns view
+    all_data_rows = ""
+    for _, row in df.iterrows():
+        cells = "".join(
+            f"<td>{str(row[col]) if str(row[col]) != 'nan' else '—'}</td>"
+            for col in preview_cols
+        )
+        all_data_rows += f"<tr>{cells}</tr>\n"
+
+    # Build all rows, all columns view
+    all_data_all_cols = ""
+    for _, row in df.iterrows():
+        cells = "".join(
+            f"<td>{str(row[col]) if str(row[col]) != 'nan' else '—'}</td>"
+            for col in df.columns
+        )
+        all_data_all_cols += f"<tr>{cells}</tr>\n"
+
+    return f"""
+    <!-- Data Preview Button -->
+    <button class="preview-btn" onclick="openPreview()">
+    Preview Raw Data ({total_rows:,} rows × {total_cols} columns)
+    </button>
+
+    <!-- Modal Overlay -->
+    <div id="dataModal" class="modal-overlay" onclick="closeOnOverlay(event)">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closePreview()">✕</button>
+            <h2 style="margin-top:0;font-size:1.1rem;color:#2c3e50;">
+                Raw Data Preview
+            </h2>
+            <p style="font-size:0.82em;color:#666;margin-bottom:8px;">
+                Showing <span id="rowLabel">first 20</span> rows ×
+                <span id="colLabel">first 20</span> columns
+                ({total_rows:,} total rows, {total_cols} total columns)
+            </p>
+
+        <!-- Expand buttons -->
+        <div style="margin-bottom:12px;">
+            <button class="expand-btn" onclick="expandCols()" id="colBtn">
+                Show all {total_cols} columns →
+            </button>
+            <button class="expand-btn" onclick="expandRows()" id="rowBtn">
+                Show all {total_rows:,} rows →
+            </button>
+        </div>
+
+        <!-- Table container -->
+        <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+            <table class="modal-table" id="previewTable">
+                <thead id="previewHead">
+                    <tr>{default_headers}</tr>
+                </thead>
+                <tbody id="previewBody">
+                    {default_rows}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+    <script>
+    // Store all data states for the preview modal
+    var _allHeaders = `<tr>{all_headers}</tr>`;
+    var _defaultHeaders = `<tr>{default_headers}</tr>`;
+    var _defaultRows = `{default_rows.replace('`', '"')}`;
+    var _allRows = `{all_rows.replace('`', '"')}`;
+    var _allDataRows = `{all_data_rows.replace('`', '"')}`;
+    var _allDataAllCols = `{all_data_all_cols.replace('`', '"')}`;
+
+    var showingAllCols = false;
+    var showingAllRows = false;
+
+function openPreview() {{
+    // Reset to default view each time modal opens
+    showingAllCols = false;
+    showingAllRows = false;
+    document.getElementById('previewHead').innerHTML = _defaultHeaders;
+    document.getElementById('previewBody').innerHTML = _defaultRows;
+    document.getElementById('colLabel').textContent = 'first 20';
+    document.getElementById('rowLabel').textContent = 'first 20';
+    document.getElementById('colBtn').style.display = 'inline-block';
+    document.getElementById('rowBtn').style.display = 'inline-block';
+    document.getElementById('dataModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}}
+
+function closePreview() {{
+    document.getElementById('dataModal').style.display = 'none';
+    document.body.style.overflow = '';
+}}
+
+function closeOnOverlay(event) {{
+    // Close if user clicks the dark overlay, not the modal box itself
+    if (event.target === document.getElementById('dataModal')) {{
+        closePreview();
+    }}
+}}
+
+function expandCols() {{
+    // Switch to all columns view
+    showingAllCols = true;
+    document.getElementById('previewHead').innerHTML = _allHeaders;
+    document.getElementById('previewBody').innerHTML = 
+        showingAllRows ? _allDataAllCols : _allRows;
+    document.getElementById('colLabel').textContent = 'all';
+    document.getElementById('colBtn').style.display = 'none';
+}}
+
+function expandRows() {{
+    // Switch to all rows view
+    showingAllRows = true;
+    document.getElementById('previewBody').innerHTML = 
+        showingAllCols ? _allDataAllCols : _allDataRows;
+    document.getElementById('rowLabel').textContent = 'all';
+    document.getElementById('rowBtn').style.display = 'none';
+}}
+</script>
+"""
 
 def _write_html(pr, mr, vr, path, df=None):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -256,6 +427,12 @@ def _write_html(pr, mr, vr, path, df=None):
         f'<div class="card" style="border-color:#e67e22;">'
         f'<div class="val" style="color:#e67e22;">{vr.warning_count}</div>'
         f'<div class="lbl">Validation<br>warnings</div></div>'
+         f'<div class="card" style="border-color:#8e44ad;">'
+        f'<div class="val" style="color:#8e44ad;">{pr.duplicate_count}</div>'
+        f'<div class="lbl">Duplicate<br>rows</div></div>'
+        f'<div class="card" style="border-color:#7f8c8d;">'
+        f'<div class="val" style="color:#7f8c8d;">{pr.fully_blank_rows}</div>'
+        f'<div class="lbl">Fully blank<br>rows</div></div>'
     )
 
     html = f"""<!DOCTYPE html>
@@ -281,6 +458,30 @@ def _write_html(pr, mr, vr, path, df=None):
   tr:hover td{{background:#f0f4f8;}}
   code{{background:#eee;padding:1px 5px;border-radius:3px;font-size:0.85em;}}
   .footer{{margin-top:48px;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:16px;}}
+  .section-toggle{{cursor:pointer;user-select:none;display:flex;
+                   align-items:center;justify-content:space-between;}}
+  .section-toggle::after{{content:'hide ▲';font-size:0.7em;color:#999;margin-left:8px;}}
+  .section-toggle.collapsed::after{{content:'show ▼';}}
+  .section-content{{transition:opacity 0.2s ease;}}
+  .section-content.hidden{{display:none;}}
+   .modal-overlay{{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+                  background:rgba(0,0,0,0.5);z-index:1000;overflow:auto;}}
+  .modal-box{{background:#fff;margin:40px auto;padding:24px;max-width:95%;
+              border-radius:8px;position:relative;}}
+  .modal-close{{position:absolute;top:12px;right:16px;font-size:1.4rem;
+                cursor:pointer;color:#666;border:none;background:none;}}
+  .modal-close:hover{{color:#c0392b;}}
+  .modal-table{{border-collapse:collapse;width:100%;font-size:0.82em;overflow-x:auto;display:block;}}
+  .modal-table th{{background:#2c3e50;color:#fff;padding:8px 10px;
+                   text-align:left;white-space:nowrap;}}
+  .modal-table td{{padding:6px 10px;border-bottom:1px solid #eee;white-space:nowrap;}}
+  .modal-table tr:hover td{{background:#f0f4f8;}}
+  .preview-btn{{margin-top:12px;padding:8px 16px;background:#2c3e50;color:#fff;
+                border:none;border-radius:4px;font-size:0.85em;cursor:pointer;}}
+  .preview-btn:hover{{background:#34495e;}}
+  .expand-btn{{margin:8px 4px 0 0;padding:6px 12px;background:#f0f4f8;
+               border:1px solid #ddd;border-radius:4px;font-size:0.82em;cursor:pointer;}}
+  .expand-btn:hover{{background:#e0e8f0;}}
 </style>
 </head>
 <body>
@@ -291,12 +492,52 @@ def _write_html(pr, mr, vr, path, df=None):
   Columns: <strong>{pr.num_cols}</strong> &nbsp;|&nbsp;
   Rules applied: {', '.join(vr.rules_applied) or 'none'}
 </p>
-<h2>Dataset Overview</h2>
+<h2 class="section-toggle" onclick="toggleSection(this)">Dataset Overview</h2>
+<div class="section-content">
 <div class="cards">{cards}</div>
-<h2>Missingness Distribution</h2>
+{_build_data_preview(df)}
+</div>
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Distribution</h2>
+<div class="section-content">
 {_build_bar_chart(pr)}
-<h2>Column Profiles</h2>
-<table>
+</div>
+
+<h2 class="section-toggle" onclick="toggleSection(this)">Column Profiles</h2>
+<div class="section-content">
+<div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+    <!-- Filter by missingness class -->
+    <div>
+        <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
+            Filter by class:
+        </label>
+        <select id="classFilter" onchange="filterTable()"
+                style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                       font-size:0.85em;background:#fff;">
+            <option value="all">All columns</option>
+            <option value="structural">Structural</option>
+            <option value="partial">Partial</option>
+            <option value="complete">Complete</option>
+        </select>
+    </div>
+    <!-- Search by column name (case insensitive) -->
+    <div>
+        <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
+            Search column:
+        </label>
+        <input id="colSearch" type="text" oninput="filterTable()"
+               placeholder="e.g. Library, Date..."
+               style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                      font-size:0.85em;width:200px;"/>
+    </div>
+    <!-- Row count indicator -->
+    <div id="rowCount" style="font-size:0.82em;color:#999;margin-left:auto;"></div>
+    <button id="showAllBtn" onclick="showAll()"
+            style="display:none;padding:6px 14px;background:#2c3e50;color:#fff;
+                   border:none;border-radius:4px;font-size:0.82em;cursor:pointer;">
+        Show all columns
+    </button>
+</div>
+<table id="profileTable">
 <thead>
 <tr>
   <th>Column</th><th>Type</th><th>Missing</th><th>Class</th>
@@ -308,17 +549,103 @@ def _write_html(pr, mr, vr, path, df=None):
 {rows}
 </tbody>
 </table>
-<h2>Validation Results</h2>
+</div>
+
+<h2 class="section-toggle" onclick="toggleSection(this)">Validation Results</h2>
+<div class="section-content">
 {issues_html}
-<h2>Missingness Summary</h2>
+</div>
+
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Summary</h2>
+<div class="section-content">
 <table>
 <thead><tr><th>Metric</th><th>Value</th></tr></thead>
 <tbody>
 {"".join(f"<tr><td>{k.replace('_',' ').title()}</td><td>{v}</td></tr>" for k, v in mr.summary.items())}
 </tbody>
 </table>
-{"<h2>Profiler Warnings</h2>" + "".join(f"<p>⚠ {w}</p>" for w in pr.warnings[:5]) + (f"<p>... and {len(pr.warnings)-5} more structural columns.</p>" if len(pr.warnings) > 5 else "") if pr.warnings else ""}
+</div>
+
+{"<h2 class='section-toggle' onclick='toggleSection(this)'>Profiler Warnings</h2><div class='section-content'>" + "".join(f"<p>⚠ {w}</p>" for w in pr.warnings[:5]) + (f"<p>... and {len(pr.warnings)-5} more structural columns.</p>" if len(pr.warnings) > 5 else "") + "</div>" if pr.warnings else ""}
 <div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
+<script>
+// Default number of rows to display before user clicks "Show all"
+// Filter the column profiles table by missingness class and/or column name.
+// Filters are applied simultaneously on every change.
+var showAllRows = false;
+var PAGE_SIZE = 10;
+
+function filterTable(event) {{
+    // When filters change, reset back to paginated view
+    if (event && event.type !== 'click') {{
+        showAllRows = false;
+    }}
+
+    var classFilter = document.getElementById('classFilter').value.toLowerCase();
+    var searchTerm = document.getElementById('colSearch').value.toLowerCase().trim();
+
+    var rows = document.querySelectorAll('#profileTable tbody tr');
+    var matchedRows = [];
+
+    // First pass — find all rows matching current filters
+    rows.forEach(function(row) {{
+        var colName = row.cells[0].textContent.toLowerCase();
+        var missClass = row.cells[3].textContent.toLowerCase().trim();
+        var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
+        var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
+
+        if (matchesClass && matchesSearch) {{
+            matchedRows.push(row);
+        }} else {{
+            // Hide rows that don't match filters at all
+            row.style.display = 'none';
+        }}
+    }});
+
+    // Second pass — apply pagination to matched rows
+    var visibleCount = 0;
+    matchedRows.forEach(function(row, index) {{
+        if (showAllRows || index < PAGE_SIZE) {{
+            row.style.display = '';
+            visibleCount++;
+        }} else {{
+            row.style.display = 'none';
+        }}
+    }});
+
+    // Update row count indicator
+    document.getElementById('rowCount').textContent =
+        'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
+
+    // Show or hide the "Show all" button
+    var btn = document.getElementById('showAllBtn');
+    if (matchedRows.length > PAGE_SIZE && !showAllRows) {{
+        btn.style.display = 'inline-block';
+        btn.textContent = 'Show all ' + matchedRows.length + ' columns ↓';
+    }} else {{
+        btn.style.display = 'none';
+    }}
+}}
+
+function showAll() {{
+    // Reveal all matching rows
+    showAllRows = true;
+    filterTable();
+}}
+
+function toggleSection(header) {{
+    // Toggle collapsed state on the header
+    header.classList.toggle('collapsed');
+    // Find the next sibling section-content div and hide/show it
+    var content = header.nextElementSibling;
+    if (content && content.classList.contains('section-content')) {{
+        content.classList.toggle('hidden');
+    }}
+}}
+
+// Run on page load to initialise pagination
+window.onload = function() {{ filterTable(); }};
+</script>
 </body>
 </html>"""
 

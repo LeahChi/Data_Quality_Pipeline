@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-03T14:42:06.558043",
+  "generated_at": "2026-04-05T14:50:32.165624",
   "dataset": "Leeds Market Stalls",
   "structure": {
     "num_rows": 9999,
@@ -1131,7 +1131,7 @@
         "column": "Day",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['Monday', 'monday'], ['Tuesday', 'tuesday']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['monday', 'Monday'], ['Tuesday', 'tuesday']]",
         "affected_count": 4
       },
       {
@@ -1145,7 +1145,7 @@
         "column": "LEEDSAdditionalInformation",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['NO MKT', 'No Mkt']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['No Mkt', 'NO MKT']]",
         "affected_count": 2
       },
       {
@@ -1159,14 +1159,14 @@
         "column": "YEADONAdditionalInformation",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['NO MKT', 'No Mkt'], ['N0 MKT', 'N0 Mkt']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['No Mkt', 'NO MKT'], ['N0 MKT', 'N0 Mkt']]",
         "affected_count": 4
       },
       {
         "column": "OTLEYAdditionalInformation",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['NO MKT', 'No Mkt']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['No Mkt', 'NO MKT']]",
         "affected_count": 2
       },
       {
@@ -1180,7 +1180,7 @@
         "column": "PUDSEYAdditionalInformation",
         "rule": "category_consistency",
         "severity": "warning",
-        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['NO MKT', 'No Mkt']]",
+        "message": "Category inconsistency detected \u2014 same value appears in multiple forms. Examples: [['No Mkt', 'NO MKT']]",
         "affected_count": 2
       }
     ]
