@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<!--
+    report_template.html — HTML template for the Data Quality Pipeline report.
+
+    This file defines the static structure, styling, and interactive behaviour
+    of the generated HTML report. Dynamic content is injected by report.py
+    at generation time via placeholder replacement.
+
+    Placeholders follow the format: PLACEHOLDER:NAME
+    Each placeholder is replaced by report.py with generated HTML content.
+
+    Interactive features:
+        - Collapsible sections (toggleSection)
+        - Column profile filter by missingness class (filterTable)
+        - Column search by name, case insensitive (filterTable)
+        - Paginated column display, 10 rows default (filterTable / showAll)
+        - Missingness bar chart (Chart.js 4.4.0 via CDN)
+        - Raw data preview modal (openPreview / closePreview)
+
+    Note: The Chart.js library is loaded from a CDN. An internet connection
+    is required to render the missingness bar chart when opening the report.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DQ Report: <!-- PLACEHOLDER:DATASET_NAME --></title>
+<style>
+  /* -----------------------------------------------------------------------
+     Base layout and typography
+  ----------------------------------------------------------------------- */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px;
+    color: #222;
+    background: #fafafa;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-top: 36px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-left: 4px solid #2c3e50;
+    padding-left: 12px;
+  }
+
+  .meta {
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 24px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Dataset overview cards
+  ----------------------------------------------------------------------- */
+  .cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .card {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 2px solid #eee;
+    background: #fff;
+    text-align: center;
+  }
+
+  .card .val {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .card .lbl {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* -----------------------------------------------------------------------
+     Tables
+  ----------------------------------------------------------------------- */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.85em;
+    margin-top: 12px;
+  }
+
+  th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+
+  tr:hover td {
+    background: #f0f4f8;
+  }
+
+  code {
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  /* -----------------------------------------------------------------------
+     Footer
+  ----------------------------------------------------------------------- */
+  .footer {
+    margin-top: 48px;
+    font-size: 0.75em;
+    color: #999;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Collapsible sections
+     Each h2 with class section-toggle acts as a toggle button.
+     The following sibling div.section-content is shown/hidden.
+  ----------------------------------------------------------------------- */
+  .section-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Arrow indicator — shows "hide" when expanded, "show" when collapsed */
+  .section-toggle::after {
+    content: 'hide ▲';
+    font-size: 0.7em;
+    color: #999;
+    margin-left: 8px;
+  }
+
+  .section-toggle.collapsed::after {
+    content: 'show ▼';
+  }
+
+  .section-content {
+    transition: opacity 0.2s ease;
+  }
+
+  .section-content.hidden {
+    display: none;
+  }
+
+  /* -----------------------------------------------------------------------
+     Raw data preview modal
+  ----------------------------------------------------------------------- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-box {
+    background: #fff;
+    margin: 40px auto;
+    padding: 24px;
+    max-width: 95%;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #666;
+    border: none;
+    background: none;
+  }
+
+  .modal-close:hover {
+    color: #c0392b;
+  }
+
+  /* Modal table — horizontally scrollable for wide datasets */
+  .modal-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82em;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .modal-table th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .modal-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+  }
+
+  .modal-table tr:hover td {
+    background: #f0f4f8;
+  }
+
+  /* -----------------------------------------------------------------------
+     Buttons
+  ----------------------------------------------------------------------- */
+  .preview-btn {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+
+  .preview-btn:hover {
+    background: #34495e;
+  }
+
+  .expand-btn {
+    margin: 8px 4px 0 0;
+    padding: 6px 12px;
+    background: #f0f4f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.82em;
+    cursor: pointer;
+  }
+
+  .expand-btn:hover {
+    background: #e0e8f0;
+  }
+</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     Report header
+========================================================================== -->
+<h1>Data Quality Report: <!-- PLACEHOLDER:DATASET_NAME --></h1>
+<p class="meta">
+  Generated: <!-- PLACEHOLDER:TIMESTAMP --> &nbsp;|&nbsp;
+  Rows: <strong><!-- PLACEHOLDER:NUM_ROWS --></strong> &nbsp;|&nbsp;
+  Columns: <strong><!-- PLACEHOLDER:NUM_COLS --></strong> &nbsp;|&nbsp;
+  Rules applied: <!-- PLACEHOLDER:RULES_APPLIED -->
+</p>
+
+<!-- =========================================================================
+     Dataset Overview
+     Shows summary cards and the raw data preview button/modal.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Dataset Overview</h2>
+<div class="section-content">
+  <div class="cards"><!-- PLACEHOLDER:CARDS --></div>
+  <!-- PLACEHOLDER:DATA_PREVIEW -->
+</div>
+
+<!-- =========================================================================
+     Missingness Distribution
+     Chart.js horizontal bar chart — top 20 partial columns by missing fraction.
+     Requires internet connection to load Chart.js from CDN.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Distribution</h2>
+<div class="section-content">
+  <!-- PLACEHOLDER:CHART -->
+</div>
+
+<!-- =========================================================================
+     Column Profiles
+     Filterable, searchable, paginated table of per-column profiling results.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Column Profiles</h2>
+<div class="section-content">
+
+  <!-- Filter controls -->
+  <div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+
+    <!-- Filter by missingness class -->
+    <div>
+      <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Filter by class:
+      </label>
+      <select id="classFilter" onchange="filterTable()"
+              style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                     font-size:0.85em;background:#fff;">
+        <option value="all">All columns</option>
+        <option value="structural">Structural</option>
+        <option value="partial">Partial</option>
+        <option value="complete">Complete</option>
+      </select>
+    </div>
+
+    <!-- Search by column name — case insensitive -->
+    <div>
+      <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Search column:
+      </label>
+      <input id="colSearch" type="text" oninput="filterTable()"
+             placeholder="e.g. Library, Date..."
+             style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                    font-size:0.85em;width:200px;"/>
+    </div>
+
+    <!-- Row count indicator and show-all button -->
+    <div id="rowCount" style="font-size:0.82em;color:#999;margin-left:auto;"></div>
+    <button id="showAllBtn" onclick="showAll()"
+            style="display:none;padding:6px 14px;background:#2c3e50;color:#fff;
+                   border:none;border-radius:4px;font-size:0.82em;cursor:pointer;">
+      Show all columns
+    </button>
+  </div>
+
+  <!-- Column profiles table -->
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Missing</th>
+        <th>Class</th>
+        <th>Unique</th>
+        <th>Constant?</th>
+        <th>Sentinel Flags</th>
+        <th>Example Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- PLACEHOLDER:ROWS -->
+    </tbody>
+  </table>
+</div>
+
+<!-- =========================================================================
+     Validation Results
+     Colour-coded list of validation errors and warnings.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Validation Results</h2>
+<div class="section-content">
+  <!-- PLACEHOLDER:ISSUES -->
+</div>
+
+<!-- =========================================================================
+     Missingness Summary
+     Aggregated missingness metrics across the full dataset.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Summary</h2>
+<div class="section-content">
+  <table>
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <!-- PLACEHOLDER:MISSINGNESS_TABLE -->
+    </tbody>
+  </table>
+</div>
+
+<!-- =========================================================================
+     Profiler Warnings (injected only if warnings exist)
+========================================================================== -->
+<!-- PLACEHOLDER:PROFILER_WARNINGS -->
+
+<!-- =========================================================================
+     Footer
+========================================================================== -->
+<div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
+
+<!-- =========================================================================
+     JavaScript
+     All interactive behaviour is defined here and operates on the static
+     HTML structure above. No external JS dependencies except Chart.js
+     (loaded inline by the chart placeholder when needed).
+========================================================================== -->
+<script>
+  // -------------------------------------------------------------------------
+  // Column profiles table — filter, search, and pagination
+  // -------------------------------------------------------------------------
+
+  // Number of rows to show by default before "Show all" is clicked
+  var showAllRows = false;
+  var PAGE_SIZE = 10;
+
+  function filterTable(event) {
+    // When filters change, reset back to paginated view
+    if (event && event.type !== 'click') {
+      showAllRows = false;
+    }
+
+    var classFilter = document.getElementById('classFilter').value.toLowerCase();
+    var searchTerm = document.getElementById('colSearch').value.toLowerCase().trim();
+
+    var rows = document.querySelectorAll('#profileTable tbody tr');
+    var matchedRows = [];
+
+    // First pass — find all rows matching current filters
+    rows.forEach(function(row) {
+      var colName = row.cells[0].textContent.toLowerCase();
+      // Missingness class badge text is in the fourth cell (index 3)
+      var missClass = row.cells[3].textContent.toLowerCase().trim();
+      var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
+      var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
+
+      if (matchesClass && matchesSearch) {
+        matchedRows.push(row);
+      } else {
+        // Hide rows that don't match filters at all
+        row.style.display = 'none';
+      }
+    });
+
+    // Second pass — apply pagination to matched rows
+    var visibleCount = 0;
+    matchedRows.forEach(function(row, index) {
+      if (showAllRows || index < PAGE_SIZE) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Update row count indicator
+    document.getElementById('rowCount').textContent =
+      'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
+
+    // Show or hide the "Show all" button depending on whether pagination is active
+    var btn = document.getElementById('showAllBtn');
+    if (matchedRows.length > PAGE_SIZE && !showAllRows) {
+      btn.style.display = 'inline-block';
+      btn.textContent = 'Show all ' + matchedRows.length + ' columns';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function showAll() {
+    // Reveal all matching rows when the user clicks "Show all"
+    showAllRows = true;
+    filterTable();
+  }
+
+  // -------------------------------------------------------------------------
+  // Collapsible sections
+  // -------------------------------------------------------------------------
+
+  function toggleSection(header) {
+    // Toggle collapsed state on the h2 header element
+    header.classList.toggle('collapsed');
+    // Find the immediately following section-content div and hide/show it
+    var content = header.nextElementSibling;
+    if (content && content.classList.contains('section-content')) {
+      content.classList.toggle('hidden');
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Initialisation — run filter on page load to set initial row count
+  // -------------------------------------------------------------------------
+  window.onload = function() {
+    filterTable();
+  };
+</script>
+
+</body>
+</html>
