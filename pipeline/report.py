@@ -1,5 +1,15 @@
 """
 report.py — Structured report generation (JSON + HTML).
+
+Generates two output formats per dataset:
+    - JSON: machine-readable structured output for downstream processing
+    - HTML: human-readable interactive report for direct inspection
+
+A static template file (report_template.html) defines the structure, styling, and
+interactive behaviour of the report. 
+This module builds the dynamic content (column profiles, missingness chart, validation issues, data preview) 
+and injects it into the template via placeholder replacement.
+
 """
 
 import json
@@ -13,6 +23,20 @@ from .validator import ValidationResult
 
 
 def generate_report(profiling_result, missingness_result, validation_result, output_dir="outputs", formats=None, df=None):
+    """
+    Generate JSON and/or HTML reports for a profiled dataset.
+
+    Args:
+        profiling_result: Output from profiler.profile()
+        missingness_result: Output from missing.detect_missingness()
+        validation_result: Output from validator.validate()
+        output_dir: Directory to write output files to. Created if not exists.
+        formats: List of formats to generate. Defaults to ["json", "html"].
+        df: Optional pandas DataFrame for raw data preview in HTML report.
+
+    Returns:
+        Dict mapping format names to output file paths.
+    """
     formats = formats or ["json", "html"]
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -27,13 +51,22 @@ def generate_report(profiling_result, missingness_result, validation_result, out
 
     if "html" in formats:
         path = output_path / f"{safe_name}_report.html"
-        _write_html(profiling_result, missingness_result, validation_result, path, df = df)
+        _write_html(profiling_result, missingness_result, validation_result, path, df=df)
         outputs["html"] = str(path)
 
     return outputs
 
 
 def _write_json(pr, mr, vr, path):
+    """
+    Write a structured JSON report for a profiled dataset.
+
+    Args:
+        pr: ProfileResult from profiler.profile()
+        mr: MissingnessResult from missing.detect_missingness()
+        vr: ValidationResult from validator.validate()
+        path: Output file path.
+    """
     report = {
         "generated_at": datetime.now().isoformat(),
         "dataset": pr.dataset_name,
@@ -82,7 +115,12 @@ def _write_json(pr, mr, vr, path):
         json.dump(report, f, indent=2, default=str)
 
 
+# ---------------------------------------------------------------------------
+# HTML helper functions
+# ---------------------------------------------------------------------------
+
 def _badge(text, colour):
+    """Return a coloured inline badge span element."""
     return (
         f'<span style="background:{colour};color:#fff;padding:2px 8px;'
         f'border-radius:3px;font-size:0.78em;font-weight:600;">{text}</span>'
@@ -90,11 +128,14 @@ def _badge(text, colour):
 
 
 def _severity_colour(s):
+    """Map a validation severity level to a display colour."""
     return {"error": "#c0392b", "warning": "#e67e22", "info": "#2980b9"}.get(s, "#7f8c8d")
 
 
 def _missingness_colour(c):
+    """Map a missingness class to a display colour."""
     return {"structural": "#c0392b", "partial": "#e67e22", "complete": "#27ae60"}.get(c, "#7f8c8d")
+
 
 def _build_bar_chart(pr):
     """
@@ -123,8 +164,8 @@ def _build_bar_chart(pr):
     if chartable.empty:
         return "<p style='color:#27ae60;font-weight:600;'>No partial missingness detected.</p>"
 
-    # Extract labels (column names), values (% missing), and colours
-    # Colours match the missingness classification badges used elsewhere in the report
+    # Extract labels (column names), values (% missing), and colours.
+    # Colours match the missingness classification badges used elsewhere in the report.
     labels = list(chartable["column"])
     values = [round(float(v) * 100, 1) for v in chartable["missing_fraction"]]
     colours = [
@@ -158,16 +199,16 @@ def _build_bar_chart(pr):
                 }}]
             }},
             options: {{
-            // indexAxis: 'y' makes this a horizontal bar chart
-            // which is easier to read for long column names
+                // indexAxis: 'y' makes this a horizontal bar chart
+                // which is easier to read for long column names
                 indexAxis: 'y',
                 responsive: true,
                 plugins: {{
-                // Hide the legend since colours are self-explanatory
+                    // Hide the legend since colours are self-explanatory
                     legend: {{ display: false }},
                     tooltip: {{
                         callbacks: {{
-                        // Format tooltip to show percentage
+                            // Format tooltip to show percentage
                             label: function(context) {{
                                 return context.parsed.x.toFixed(1) + '% missing';
                             }}
@@ -192,6 +233,7 @@ def _build_bar_chart(pr):
     <p style="font-size:0.78em;color:#999;margin-top:8px;">
         Top 20 columns by missing fraction. Structural (100% missing) columns excluded.
     </p>"""
+
 
 def _build_data_preview(df):
     """
@@ -218,14 +260,10 @@ def _build_data_preview(df):
     preview_cols = list(df.columns[:20])
 
     # Build table headers for default (20 col) view
-    default_headers = "".join(
-        f"<th>{col}</th>" for col in preview_cols
-    )
+    default_headers = "".join(f"<th>{col}</th>" for col in preview_cols)
 
     # Build table headers for all columns view
-    all_headers = "".join(
-        f"<th>{col}</th>" for col in df.columns
-    )
+    all_headers = "".join(f"<th>{col}</th>" for col in df.columns)
 
     # Build table rows for default (20 col) view
     default_rows = ""
@@ -236,7 +274,7 @@ def _build_data_preview(df):
         )
         default_rows += f"<tr>{cells}</tr>\n"
 
-    # Build table rows for all columns view
+    # Build table rows for all columns, first 20 rows
     all_rows = ""
     for _, row in preview_rows.iterrows():
         cells = "".join(
@@ -266,48 +304,49 @@ def _build_data_preview(df):
     return f"""
     <!-- Data Preview Button -->
     <button class="preview-btn" onclick="openPreview()">
-    Preview Raw Data ({total_rows:,} rows × {total_cols} columns)
+    Preview Raw Data ({total_rows:,} rows x {total_cols} columns)
     </button>
 
     <!-- Modal Overlay -->
     <div id="dataModal" class="modal-overlay" onclick="closeOnOverlay(event)">
         <div class="modal-box">
-            <button class="modal-close" onclick="closePreview()">✕</button>
+            <button class="modal-close" onclick="closePreview()">X</button>
             <h2 style="margin-top:0;font-size:1.1rem;color:#2c3e50;">
                 Raw Data Preview
             </h2>
             <p style="font-size:0.82em;color:#666;margin-bottom:8px;">
-                Showing <span id="rowLabel">first 20</span> rows ×
+                Showing <span id="rowLabel">first 20</span> rows x
                 <span id="colLabel">first 20</span> columns
                 ({total_rows:,} total rows, {total_cols} total columns)
             </p>
 
-        <!-- Expand buttons -->
-        <div style="margin-bottom:12px;">
-            <button class="expand-btn" onclick="expandCols()" id="colBtn">
-                Show all {total_cols} columns →
-            </button>
-            <button class="expand-btn" onclick="expandRows()" id="rowBtn">
-                Show all {total_rows:,} rows →
-            </button>
-        </div>
+            <!-- Expand buttons -->
+            <div style="margin-bottom:12px;">
+                <button class="expand-btn" onclick="expandCols()" id="colBtn">
+                    Show all {total_cols} columns
+                </button>
+                <button class="expand-btn" onclick="expandRows()" id="rowBtn">
+                    Show all {total_rows:,} rows
+                </button>
+            </div>
 
-        <!-- Table container -->
-        <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
-            <table class="modal-table" id="previewTable">
-                <thead id="previewHead">
-                    <tr>{default_headers}</tr>
-                </thead>
-                <tbody id="previewBody">
-                    {default_rows}
-                </tbody>
-            </table>
+            <!-- Table container — horizontally and vertically scrollable -->
+            <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+                <table class="modal-table" id="previewTable">
+                    <thead id="previewHead">
+                        <tr>{default_headers}</tr>
+                    </thead>
+                    <tbody id="previewBody">
+                        {default_rows}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
     <script>
-    // Store all data states for the preview modal
+    // Store all four data state combinations for the preview modal.
+    // These are pre-built at report generation time to avoid re-fetching data.
     var _allHeaders = `<tr>{all_headers}</tr>`;
     var _defaultHeaders = `<tr>{default_headers}</tr>`;
     var _defaultRows = `{default_rows.replace('`', '"')}`;
@@ -318,63 +357,77 @@ def _build_data_preview(df):
     var showingAllCols = false;
     var showingAllRows = false;
 
-function openPreview() {{
-    // Reset to default view each time modal opens
-    showingAllCols = false;
-    showingAllRows = false;
-    document.getElementById('previewHead').innerHTML = _defaultHeaders;
-    document.getElementById('previewBody').innerHTML = _defaultRows;
-    document.getElementById('colLabel').textContent = 'first 20';
-    document.getElementById('rowLabel').textContent = 'first 20';
-    document.getElementById('colBtn').style.display = 'inline-block';
-    document.getElementById('rowBtn').style.display = 'inline-block';
-    document.getElementById('dataModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}}
-
-function closePreview() {{
-    document.getElementById('dataModal').style.display = 'none';
-    document.body.style.overflow = '';
-}}
-
-function closeOnOverlay(event) {{
-    // Close if user clicks the dark overlay, not the modal box itself
-    if (event.target === document.getElementById('dataModal')) {{
-        closePreview();
+    function openPreview() {{
+        // Reset to default view each time modal opens
+        showingAllCols = false;
+        showingAllRows = false;
+        document.getElementById('previewHead').innerHTML = _defaultHeaders;
+        document.getElementById('previewBody').innerHTML = _defaultRows;
+        document.getElementById('colLabel').textContent = 'first 20';
+        document.getElementById('rowLabel').textContent = 'first 20';
+        document.getElementById('colBtn').style.display = 'inline-block';
+        document.getElementById('rowBtn').style.display = 'inline-block';
+        document.getElementById('dataModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
     }}
-}}
 
-function expandCols() {{
-    // Switch to all columns view
-    showingAllCols = true;
-    document.getElementById('previewHead').innerHTML = _allHeaders;
-    document.getElementById('previewBody').innerHTML = 
-        showingAllRows ? _allDataAllCols : _allRows;
-    document.getElementById('colLabel').textContent = 'all';
-    document.getElementById('colBtn').style.display = 'none';
-}}
+    function closePreview() {{
+        document.getElementById('dataModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }}
 
-function expandRows() {{
-    // Switch to all rows view
-    showingAllRows = true;
-    document.getElementById('previewBody').innerHTML = 
-        showingAllCols ? _allDataAllCols : _allDataRows;
-    document.getElementById('rowLabel').textContent = 'all';
-    document.getElementById('rowBtn').style.display = 'none';
-}}
-</script>
+    function closeOnOverlay(event) {{
+        // Close if user clicks the dark overlay, not the modal box itself
+        if (event.target === document.getElementById('dataModal')) {{
+            closePreview();
+        }}
+    }}
+
+    function expandCols() {{
+        // Switch to all columns view
+        showingAllCols = true;
+        document.getElementById('previewHead').innerHTML = _allHeaders;
+        document.getElementById('previewBody').innerHTML =
+            showingAllRows ? _allDataAllCols : _allRows;
+        document.getElementById('colLabel').textContent = 'all';
+        document.getElementById('colBtn').style.display = 'none';
+    }}
+
+    function expandRows() {{
+        // Switch to all rows view
+        showingAllRows = true;
+        document.getElementById('previewBody').innerHTML =
+            showingAllCols ? _allDataAllCols : _allDataRows;
+        document.getElementById('rowLabel').textContent = 'all';
+        document.getElementById('rowBtn').style.display = 'none';
+    }}
+    </script>
 """
 
-def _write_html(pr, mr, vr, path, df=None):
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-    miss_map = {r.column: r for r in mr.column_results}
 
+def _build_column_rows(pr, miss_map):
+    """
+    Build the HTML table rows for the Column Profiles section.
+
+    Each row represents one column from the dataset, showing its type,
+    missingness classification, unique value count, sentinel flags, and
+    an example value.
+
+    Args:
+        pr: ProfileResult from profiler.profile()
+        miss_map: Dict mapping column names to MissingnessColumnResult objects.
+
+    Returns:
+        HTML string of <tr> elements for the profile table body.
+    """
     rows = ""
     for _, p in pr.profile_df.iterrows():
         mc = p["missingness_class"]
         mc_badge = _badge(mc, _missingness_colour(mc))
         type_badge = _badge(p["inferred_type"], "#2c3e50")
         mr_row = miss_map.get(p["column"])
+
+        # Determine sentinel flag display string
         if mr_row and mr_row.numeric_sentinel_flags:
             sentinel_str = ", ".join(str(f["value"]) for f in mr_row.numeric_sentinel_flags)
         elif mr_row and mr_row.text_sentinel_count > 0:
@@ -391,263 +444,182 @@ def _write_html(pr, mr, vr, path, df=None):
             f"<td>{p['num_unique']}</td>"
             f"<td>{'Yes' if p['is_constant'] else 'No'}</td>"
             f"<td>{sentinel_str}</td>"
-            f"<td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>{p['example_value']}</td>"
+            f"<td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;"
+            f"white-space:nowrap;'>{p['example_value']}</td>"
             f"</tr>\n"
         )
+    return rows
 
+
+def _build_issues_html(vr):
+    """
+    Build the HTML for the Validation Results section.
+
+    Returns a success message if no issues were found, or a list of
+    colour-coded issue blocks showing severity, column, rule name, and message.
+
+    Args:
+        vr: ValidationResult from validator.validate()
+
+    Returns:
+        HTML string for the validation issues section.
+    """
     if not vr.issues:
-        issues_html = "<p style='color:#27ae60;font-weight:600;'>No validation issues detected.</p>"
-    else:
-        issues_html = ""
-        for issue in vr.issues:
-            colour = _severity_colour(issue.severity)
-            issues_html += (
-                f"<div style='margin:8px 0;padding:12px 16px;"
-                f"border-left:4px solid {colour};background:#f9f9f9;border-radius:0 4px 4px 0;'>"
-                f"{_badge(issue.severity.upper(), colour)} "
-                f"<strong>{issue.column}</strong> — "
-                f"<code style='font-size:0.82em;color:#555;'>{issue.rule_name}</code><br>"
-                f"<span style='color:#444;font-size:0.9em;'>{issue.message}</span>"
-                f"</div>\n"
-            )
+        return "<p style='color:#27ae60;font-weight:600;'>No validation issues detected.</p>"
 
-    cards = (
+    issues_html = ""
+    for issue in vr.issues:
+        colour = _severity_colour(issue.severity)
+        issues_html += (
+            f"<div style='margin:8px 0;padding:12px 16px;"
+            f"border-left:4px solid {colour};background:#f9f9f9;"
+            f"border-radius:0 4px 4px 0;'>"
+            f"{_badge(issue.severity.upper(), colour)} "
+            f"<strong>{issue.column}</strong> — "
+            f"<code style='font-size:0.82em;color:#555;'>{issue.rule_name}</code><br>"
+            f"<span style='color:#444;font-size:0.9em;'>{issue.message}</span>"
+            f"</div>\n"
+        )
+    return issues_html
+
+
+def _build_cards(pr, vr):
+    """
+    Build the dataset overview summary cards.
+
+    Shows structural, partial, and complete column counts alongside
+    validation error/warning counts, duplicate rows, and blank rows.
+
+    Args:
+        pr: ProfileResult from profiler.profile()
+        vr: ValidationResult from validator.validate()
+
+    Returns:
+        HTML string of card div elements.
+    """
+    return (
         f'<div class="card" style="border-color:#c0392b;">'
         f'<div class="val" style="color:#c0392b;">{len(pr.structural_cols)}</div>'
         f'<div class="lbl">Structural columns<br>(100% missing)</div></div>'
+
         f'<div class="card" style="border-color:#e67e22;">'
         f'<div class="val" style="color:#e67e22;">{len(pr.partial_cols)}</div>'
         f'<div class="lbl">Partial missingness<br>columns</div></div>'
+
         f'<div class="card" style="border-color:#27ae60;">'
         f'<div class="val" style="color:#27ae60;">{len(pr.complete_cols)}</div>'
         f'<div class="lbl">Fully complete<br>columns</div></div>'
+
         f'<div class="card" style="border-color:#2c3e50;">'
         f'<div class="val">{vr.error_count}</div>'
         f'<div class="lbl">Validation<br>errors</div></div>'
+
         f'<div class="card" style="border-color:#e67e22;">'
         f'<div class="val" style="color:#e67e22;">{vr.warning_count}</div>'
         f'<div class="lbl">Validation<br>warnings</div></div>'
-         f'<div class="card" style="border-color:#8e44ad;">'
+
+        f'<div class="card" style="border-color:#8e44ad;">'
         f'<div class="val" style="color:#8e44ad;">{pr.duplicate_count}</div>'
         f'<div class="lbl">Duplicate<br>rows</div></div>'
+
         f'<div class="card" style="border-color:#7f8c8d;">'
         f'<div class="val" style="color:#7f8c8d;">{pr.fully_blank_rows}</div>'
         f'<div class="lbl">Fully blank<br>rows</div></div>'
     )
 
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>DQ Report: {pr.dataset_name}</title>
-<style>
-  body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-       max-width:1200px;margin:40px auto;padding:0 24px;color:#222;background:#fafafa;}}
-  h1{{font-size:1.8rem;border-bottom:3px solid #2c3e50;padding-bottom:10px;color:#2c3e50;}}
-  h2{{font-size:1.1rem;color:#2c3e50;margin-top:36px;text-transform:uppercase;
-      letter-spacing:.05em;border-left:4px solid #2c3e50;padding-left:12px;}}
-  .meta{{color:#666;font-size:0.85em;margin-bottom:24px;}}
-  .cards{{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0;}}
-  .card{{flex:1;min-width:120px;padding:16px;border-radius:8px;border:2px solid #eee;
-         background:#fff;text-align:center;}}
-  .card .val{{font-size:2rem;font-weight:700;}}
-  .card .lbl{{font-size:0.75rem;color:#666;margin-top:4px;line-height:1.4;}}
-  table{{border-collapse:collapse;width:100%;font-size:0.85em;margin-top:12px;}}
-  th{{background:#2c3e50;color:#fff;padding:10px 12px;text-align:left;font-weight:600;}}
-  td{{padding:8px 12px;border-bottom:1px solid #eee;vertical-align:top;}}
-  tr:hover td{{background:#f0f4f8;}}
-  code{{background:#eee;padding:1px 5px;border-radius:3px;font-size:0.85em;}}
-  .footer{{margin-top:48px;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:16px;}}
-  .section-toggle{{cursor:pointer;user-select:none;display:flex;
-                   align-items:center;justify-content:space-between;}}
-  .section-toggle::after{{content:'hide ▲';font-size:0.7em;color:#999;margin-left:8px;}}
-  .section-toggle.collapsed::after{{content:'show ▼';}}
-  .section-content{{transition:opacity 0.2s ease;}}
-  .section-content.hidden{{display:none;}}
-   .modal-overlay{{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-                  background:rgba(0,0,0,0.5);z-index:1000;overflow:auto;}}
-  .modal-box{{background:#fff;margin:40px auto;padding:24px;max-width:95%;
-              border-radius:8px;position:relative;}}
-  .modal-close{{position:absolute;top:12px;right:16px;font-size:1.4rem;
-                cursor:pointer;color:#666;border:none;background:none;}}
-  .modal-close:hover{{color:#c0392b;}}
-  .modal-table{{border-collapse:collapse;width:100%;font-size:0.82em;overflow-x:auto;display:block;}}
-  .modal-table th{{background:#2c3e50;color:#fff;padding:8px 10px;
-                   text-align:left;white-space:nowrap;}}
-  .modal-table td{{padding:6px 10px;border-bottom:1px solid #eee;white-space:nowrap;}}
-  .modal-table tr:hover td{{background:#f0f4f8;}}
-  .preview-btn{{margin-top:12px;padding:8px 16px;background:#2c3e50;color:#fff;
-                border:none;border-radius:4px;font-size:0.85em;cursor:pointer;}}
-  .preview-btn:hover{{background:#34495e;}}
-  .expand-btn{{margin:8px 4px 0 0;padding:6px 12px;background:#f0f4f8;
-               border:1px solid #ddd;border-radius:4px;font-size:0.82em;cursor:pointer;}}
-  .expand-btn:hover{{background:#e0e8f0;}}
-</style>
-</head>
-<body>
-<h1>Data Quality Report: {pr.dataset_name}</h1>
-<p class="meta">
-  Generated: {ts} &nbsp;|&nbsp;
-  Rows: <strong>{pr.num_rows:,}</strong> &nbsp;|&nbsp;
-  Columns: <strong>{pr.num_cols}</strong> &nbsp;|&nbsp;
-  Rules applied: {', '.join(vr.rules_applied) or 'none'}
-</p>
-<h2 class="section-toggle" onclick="toggleSection(this)">Dataset Overview</h2>
-<div class="section-content">
-<div class="cards">{cards}</div>
-{_build_data_preview(df)}
-</div>
-<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Distribution</h2>
-<div class="section-content">
-{_build_bar_chart(pr)}
-</div>
 
-<h2 class="section-toggle" onclick="toggleSection(this)">Column Profiles</h2>
-<div class="section-content">
-<div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
-    <!-- Filter by missingness class -->
-    <div>
-        <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
-            Filter by class:
-        </label>
-        <select id="classFilter" onchange="filterTable()"
-                style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
-                       font-size:0.85em;background:#fff;">
-            <option value="all">All columns</option>
-            <option value="structural">Structural</option>
-            <option value="partial">Partial</option>
-            <option value="complete">Complete</option>
-        </select>
-    </div>
-    <!-- Search by column name (case insensitive) -->
-    <div>
-        <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
-            Search column:
-        </label>
-        <input id="colSearch" type="text" oninput="filterTable()"
-               placeholder="e.g. Library, Date..."
-               style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
-                      font-size:0.85em;width:200px;"/>
-    </div>
-    <!-- Row count indicator -->
-    <div id="rowCount" style="font-size:0.82em;color:#999;margin-left:auto;"></div>
-    <button id="showAllBtn" onclick="showAll()"
-            style="display:none;padding:6px 14px;background:#2c3e50;color:#fff;
-                   border:none;border-radius:4px;font-size:0.82em;cursor:pointer;">
-        Show all columns
-    </button>
-</div>
-<table id="profileTable">
-<thead>
-<tr>
-  <th>Column</th><th>Type</th><th>Missing</th><th>Class</th>
-  <th>Unique</th><th>Constant?</th>
-  <th>Sentinel Flags</th><th>Example Value</th>
-</tr>
-</thead>
-<tbody>
-{rows}
-</tbody>
-</table>
-</div>
+def _build_missingness_table(mr):
+    """
+    Build the HTML rows for the Missingness Summary table.
 
-<h2 class="section-toggle" onclick="toggleSection(this)">Validation Results</h2>
-<div class="section-content">
-{issues_html}
-</div>
+    Args:
+        mr: MissingnessResult from missing.detect_missingness()
 
-<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Summary</h2>
-<div class="section-content">
-<table>
-<thead><tr><th>Metric</th><th>Value</th></tr></thead>
-<tbody>
-{"".join(f"<tr><td>{k.replace('_',' ').title()}</td><td>{v}</td></tr>" for k, v in mr.summary.items())}
-</tbody>
-</table>
-</div>
+    Returns:
+        HTML string of <tr> elements for the missingness summary table.
+    """
+    return "".join(
+        f"<tr><td>{k.replace('_', ' ').title()}</td><td>{v}</td></tr>"
+        for k, v in mr.summary.items()
+    )
 
-{"<h2 class='section-toggle' onclick='toggleSection(this)'>Profiler Warnings</h2><div class='section-content'>" + "".join(f"<p>⚠ {w}</p>" for w in pr.warnings[:5]) + (f"<p>... and {len(pr.warnings)-5} more structural columns.</p>" if len(pr.warnings) > 5 else "") + "</div>" if pr.warnings else ""}
-<div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
-<script>
-// Default number of rows to display before user clicks "Show all"
-// Filter the column profiles table by missingness class and/or column name.
-// Filters are applied simultaneously on every change.
-var showAllRows = false;
-var PAGE_SIZE = 10;
 
-function filterTable(event) {{
-    // When filters change, reset back to paginated view
-    if (event && event.type !== 'click') {{
-        showAllRows = false;
-    }}
+def _build_profiler_warnings(pr):
+    """
+    Build the Profiler Warnings section HTML.
 
-    var classFilter = document.getElementById('classFilter').value.toLowerCase();
-    var searchTerm = document.getElementById('colSearch').value.toLowerCase().trim();
+    Shows up to 5 warnings with a count of any additional ones.
+    Returns empty string if no warnings exist.
 
-    var rows = document.querySelectorAll('#profileTable tbody tr');
-    var matchedRows = [];
+    Args:
+        pr: ProfileResult from profiler.profile()
 
-    // First pass — find all rows matching current filters
-    rows.forEach(function(row) {{
-        var colName = row.cells[0].textContent.toLowerCase();
-        var missClass = row.cells[3].textContent.toLowerCase().trim();
-        var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
-        var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
+    Returns:
+        HTML string for the profiler warnings section, or empty string.
+    """
+    if not pr.warnings:
+        return ""
 
-        if (matchesClass && matchesSearch) {{
-            matchedRows.push(row);
-        }} else {{
-            // Hide rows that don't match filters at all
-            row.style.display = 'none';
-        }}
-    }});
+    warnings_html = (
+        "<h2 class='section-toggle' onclick='toggleSection(this)'>"
+        "Profiler Warnings</h2>"
+        "<div class='section-content'>"
+    )
+    warnings_html += "".join(f"<p>⚠ {w}</p>" for w in pr.warnings[:5])
+    if len(pr.warnings) > 5:
+        warnings_html += f"<p>... and {len(pr.warnings) - 5} more warnings.</p>"
+    warnings_html += "</div>"
+    return warnings_html
 
-    // Second pass — apply pagination to matched rows
-    var visibleCount = 0;
-    matchedRows.forEach(function(row, index) {{
-        if (showAllRows || index < PAGE_SIZE) {{
-            row.style.display = '';
-            visibleCount++;
-        }} else {{
-            row.style.display = 'none';
-        }}
-    }});
 
-    // Update row count indicator
-    document.getElementById('rowCount').textContent =
-        'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
+def _write_html(pr, mr, vr, path, df=None):
+    """
+    Generate the interactive HTML report by injecting dynamic content
+    into the report_template.html file.
 
-    // Show or hide the "Show all" button
-    var btn = document.getElementById('showAllBtn');
-    if (matchedRows.length > PAGE_SIZE && !showAllRows) {{
-        btn.style.display = 'inline-block';
-        btn.textContent = 'Show all ' + matchedRows.length + ' columns ↓';
-    }} else {{
-        btn.style.display = 'none';
-    }}
-}}
+    The template defines all static structure, CSS, and JavaScript.
+    This function builds the dynamic content and replaces placeholders
+    in the template with generated HTML strings.
 
-function showAll() {{
-    // Reveal all matching rows
-    showAllRows = true;
-    filterTable();
-}}
+    Args:
+        pr: ProfileResult from profiler.profile()
+        mr: MissingnessResult from missing.detect_missingness()
+        vr: ValidationResult from validator.validate()
+        path: Output file path for the generated report.
+        df: Optional pandas DataFrame for raw data preview modal.
+    """
+    # Build a lookup of missingness results by column name
+    miss_map = {r.column: r for r in mr.column_results}
 
-function toggleSection(header) {{
-    // Toggle collapsed state on the header
-    header.classList.toggle('collapsed');
-    // Find the next sibling section-content div and hide/show it
-    var content = header.nextElementSibling;
-    if (content && content.classList.contains('section-content')) {{
-        content.classList.toggle('hidden');
-    }}
-}}
+    # Build all dynamic content blocks
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+    cards = _build_cards(pr, vr)
+    rows = _build_column_rows(pr, miss_map)
+    issues_html = _build_issues_html(vr)
+    missingness_table = _build_missingness_table(mr)
+    chart = _build_bar_chart(pr)
+    data_preview = _build_data_preview(df)
+    profiler_warnings = _build_profiler_warnings(pr)
+    rules_applied = ', '.join(vr.rules_applied) or 'none'
 
-// Run on page load to initialise pagination
-window.onload = function() {{ filterTable(); }};
-</script>
-</body>
-</html>"""
+    # Load the HTML template from the same directory as this module
+    template_path = Path(__file__).parent / "report_template.html"
+    template = template_path.read_text(encoding="utf-8")
+
+    # Replace all placeholders with generated content
+    html = template
+    html = html.replace("<!-- PLACEHOLDER:DATASET_NAME -->", pr.dataset_name)
+    html = html.replace("<!-- PLACEHOLDER:TIMESTAMP -->", ts)
+    html = html.replace("<!-- PLACEHOLDER:NUM_ROWS -->", f"{pr.num_rows:,}")
+    html = html.replace("<!-- PLACEHOLDER:NUM_COLS -->", str(pr.num_cols))
+    html = html.replace("<!-- PLACEHOLDER:RULES_APPLIED -->", rules_applied)
+    html = html.replace("<!-- PLACEHOLDER:CARDS -->", cards)
+    html = html.replace("<!-- PLACEHOLDER:DATA_PREVIEW -->", data_preview)
+    html = html.replace("<!-- PLACEHOLDER:CHART -->", chart)
+    html = html.replace("<!-- PLACEHOLDER:ROWS -->", rows)
+    html = html.replace("<!-- PLACEHOLDER:ISSUES -->", issues_html)
+    html = html.replace("<!-- PLACEHOLDER:MISSINGNESS_TABLE -->", missingness_table)
+    html = html.replace("<!-- PLACEHOLDER:PROFILER_WARNINGS -->", profiler_warnings)
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)

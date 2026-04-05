@@ -1,100 +1,332 @@
 <!DOCTYPE html>
+<!--
+    report_template.html — HTML template for the Data Quality Pipeline report.
+
+    This file defines the static structure, styling, and interactive behaviour
+    of the generated HTML report. Dynamic content is injected by report.py
+    at generation time via placeholder replacement.
+
+    Placeholders follow the format: PLACEHOLDER:NAME
+    Each placeholder is replaced by report.py with generated HTML content.
+
+    Interactive features:
+        - Collapsible sections (toggleSection)
+        - Column profile filter by missingness class (filterTable)
+        - Column search by name, case insensitive (filterTable)
+        - Paginated column display, 10 rows default (filterTable / showAll)
+        - Missingness bar chart (Chart.js 4.4.0 via CDN)
+        - Raw data preview modal (openPreview / closePreview)
+
+    Note: The Chart.js library is loaded from a CDN. An internet connection
+    is required to render the missingness bar chart when opening the report.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>DQ Report: Newcastle Library Loans</title>
 <style>
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-       max-width:1200px;margin:40px auto;padding:0 24px;color:#222;background:#fafafa;}
-  h1{font-size:1.8rem;border-bottom:3px solid #2c3e50;padding-bottom:10px;color:#2c3e50;}
-  h2{font-size:1.1rem;color:#2c3e50;margin-top:36px;text-transform:uppercase;
-      letter-spacing:.05em;border-left:4px solid #2c3e50;padding-left:12px;}
-  .meta{color:#666;font-size:0.85em;margin-bottom:24px;}
-  .cards{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0;}
-  .card{flex:1;min-width:120px;padding:16px;border-radius:8px;border:2px solid #eee;
-         background:#fff;text-align:center;}
-  .card .val{font-size:2rem;font-weight:700;}
-  .card .lbl{font-size:0.75rem;color:#666;margin-top:4px;line-height:1.4;}
-  table{border-collapse:collapse;width:100%;font-size:0.85em;margin-top:12px;}
-  th{background:#2c3e50;color:#fff;padding:10px 12px;text-align:left;font-weight:600;}
-  td{padding:8px 12px;border-bottom:1px solid #eee;vertical-align:top;}
-  tr:hover td{background:#f0f4f8;}
-  code{background:#eee;padding:1px 5px;border-radius:3px;font-size:0.85em;}
-  .footer{margin-top:48px;font-size:0.75em;color:#999;border-top:1px solid #eee;padding-top:16px;}
-  .section-toggle{cursor:pointer;user-select:none;display:flex;
-                   align-items:center;justify-content:space-between;}
-  .section-toggle::after{content:'hide ▲';font-size:0.7em;color:#999;margin-left:8px;}
-  .section-toggle.collapsed::after{content:'show ▼';}
-  .section-content{transition:opacity 0.2s ease;}
-  .section-content.hidden{display:none;}
-   .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-                  background:rgba(0,0,0,0.5);z-index:1000;overflow:auto;}
-  .modal-box{background:#fff;margin:40px auto;padding:24px;max-width:95%;
-              border-radius:8px;position:relative;}
-  .modal-close{position:absolute;top:12px;right:16px;font-size:1.4rem;
-                cursor:pointer;color:#666;border:none;background:none;}
-  .modal-close:hover{color:#c0392b;}
-  .modal-table{border-collapse:collapse;width:100%;font-size:0.82em;overflow-x:auto;display:block;}
-  .modal-table th{background:#2c3e50;color:#fff;padding:8px 10px;
-                   text-align:left;white-space:nowrap;}
-  .modal-table td{padding:6px 10px;border-bottom:1px solid #eee;white-space:nowrap;}
-  .modal-table tr:hover td{background:#f0f4f8;}
-  .preview-btn{margin-top:12px;padding:8px 16px;background:#2c3e50;color:#fff;
-                border:none;border-radius:4px;font-size:0.85em;cursor:pointer;}
-  .preview-btn:hover{background:#34495e;}
-  .expand-btn{margin:8px 4px 0 0;padding:6px 12px;background:#f0f4f8;
-               border:1px solid #ddd;border-radius:4px;font-size:0.82em;cursor:pointer;}
-  .expand-btn:hover{background:#e0e8f0;}
+  /* -----------------------------------------------------------------------
+     Base layout and typography
+  ----------------------------------------------------------------------- */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px;
+    color: #222;
+    background: #fafafa;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-top: 36px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-left: 4px solid #2c3e50;
+    padding-left: 12px;
+  }
+
+  .meta {
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 24px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Dataset overview cards
+  ----------------------------------------------------------------------- */
+  .cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .card {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 2px solid #eee;
+    background: #fff;
+    text-align: center;
+  }
+
+  .card .val {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .card .lbl {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* -----------------------------------------------------------------------
+     Tables
+  ----------------------------------------------------------------------- */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.85em;
+    margin-top: 12px;
+  }
+
+  th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+
+  tr:hover td {
+    background: #f0f4f8;
+  }
+
+  code {
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  /* -----------------------------------------------------------------------
+     Footer
+  ----------------------------------------------------------------------- */
+  .footer {
+    margin-top: 48px;
+    font-size: 0.75em;
+    color: #999;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Collapsible sections
+     Each h2 with class section-toggle acts as a toggle button.
+     The following sibling div.section-content is shown/hidden.
+  ----------------------------------------------------------------------- */
+  .section-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Arrow indicator — shows "hide" when expanded, "show" when collapsed */
+  .section-toggle::after {
+    content: 'hide ▲';
+    font-size: 0.7em;
+    color: #999;
+    margin-left: 8px;
+  }
+
+  .section-toggle.collapsed::after {
+    content: 'show ▼';
+  }
+
+  .section-content {
+    transition: opacity 0.2s ease;
+  }
+
+  .section-content.hidden {
+    display: none;
+  }
+
+  /* -----------------------------------------------------------------------
+     Raw data preview modal
+  ----------------------------------------------------------------------- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-box {
+    background: #fff;
+    margin: 40px auto;
+    padding: 24px;
+    max-width: 95%;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #666;
+    border: none;
+    background: none;
+  }
+
+  .modal-close:hover {
+    color: #c0392b;
+  }
+
+  /* Modal table — horizontally scrollable for wide datasets */
+  .modal-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82em;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .modal-table th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .modal-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+  }
+
+  .modal-table tr:hover td {
+    background: #f0f4f8;
+  }
+
+  /* -----------------------------------------------------------------------
+     Buttons
+  ----------------------------------------------------------------------- */
+  .preview-btn {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+
+  .preview-btn:hover {
+    background: #34495e;
+  }
+
+  .expand-btn {
+    margin: 8px 4px 0 0;
+    padding: 6px 12px;
+    background: #f0f4f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.82em;
+    cursor: pointer;
+  }
+
+  .expand-btn:hover {
+    background: #e0e8f0;
+  }
 </style>
 </head>
 <body>
+
+<!-- =========================================================================
+     Report header
+========================================================================== -->
 <h1>Data Quality Report: Newcastle Library Loans</h1>
 <p class="meta">
-  Generated: 2026-04-05 14:51 &nbsp;|&nbsp;
+  Generated: 2026-04-05 15:10 &nbsp;|&nbsp;
   Rows: <strong>19</strong> &nbsp;|&nbsp;
   Columns: <strong>205</strong> &nbsp;|&nbsp;
   Rules applied: rule_category_consistency, rule_no_negatives, rule_no_constant_columns, rule_integers_only
 </p>
+
+<!-- =========================================================================
+     Dataset Overview
+     Shows summary cards and the raw data preview button/modal.
+========================================================================== -->
 <h2 class="section-toggle" onclick="toggleSection(this)">Dataset Overview</h2>
 <div class="section-content">
-<div class="cards"><div class="card" style="border-color:#c0392b;"><div class="val" style="color:#c0392b;">7</div><div class="lbl">Structural columns<br>(100% missing)</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">148</div><div class="lbl">Partial missingness<br>columns</div></div><div class="card" style="border-color:#27ae60;"><div class="val" style="color:#27ae60;">50</div><div class="lbl">Fully complete<br>columns</div></div><div class="card" style="border-color:#2c3e50;"><div class="val">0</div><div class="lbl">Validation<br>errors</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">0</div><div class="lbl">Validation<br>warnings</div></div><div class="card" style="border-color:#8e44ad;"><div class="val" style="color:#8e44ad;">0</div><div class="lbl">Duplicate<br>rows</div></div><div class="card" style="border-color:#7f8c8d;"><div class="val" style="color:#7f8c8d;">0</div><div class="lbl">Fully blank<br>rows</div></div></div>
-
+  <div class="cards"><div class="card" style="border-color:#c0392b;"><div class="val" style="color:#c0392b;">7</div><div class="lbl">Structural columns<br>(100% missing)</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">148</div><div class="lbl">Partial missingness<br>columns</div></div><div class="card" style="border-color:#27ae60;"><div class="val" style="color:#27ae60;">50</div><div class="lbl">Fully complete<br>columns</div></div><div class="card" style="border-color:#2c3e50;"><div class="val">0</div><div class="lbl">Validation<br>errors</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">0</div><div class="lbl">Validation<br>warnings</div></div><div class="card" style="border-color:#8e44ad;"><div class="val" style="color:#8e44ad;">0</div><div class="lbl">Duplicate<br>rows</div></div><div class="card" style="border-color:#7f8c8d;"><div class="val" style="color:#7f8c8d;">0</div><div class="lbl">Fully blank<br>rows</div></div></div>
+  
     <!-- Data Preview Button -->
     <button class="preview-btn" onclick="openPreview()">
-    Preview Raw Data (19 rows × 205 columns)
+    Preview Raw Data (19 rows x 205 columns)
     </button>
 
     <!-- Modal Overlay -->
     <div id="dataModal" class="modal-overlay" onclick="closeOnOverlay(event)">
         <div class="modal-box">
-            <button class="modal-close" onclick="closePreview()">✕</button>
+            <button class="modal-close" onclick="closePreview()">X</button>
             <h2 style="margin-top:0;font-size:1.1rem;color:#2c3e50;">
                 Raw Data Preview
             </h2>
             <p style="font-size:0.82em;color:#666;margin-bottom:8px;">
-                Showing <span id="rowLabel">first 20</span> rows ×
+                Showing <span id="rowLabel">first 20</span> rows x
                 <span id="colLabel">first 20</span> columns
                 (19 total rows, 205 total columns)
             </p>
 
-        <!-- Expand buttons -->
-        <div style="margin-bottom:12px;">
-            <button class="expand-btn" onclick="expandCols()" id="colBtn">
-                Show all 205 columns →
-            </button>
-            <button class="expand-btn" onclick="expandRows()" id="rowBtn">
-                Show all 19 rows →
-            </button>
-        </div>
+            <!-- Expand buttons -->
+            <div style="margin-bottom:12px;">
+                <button class="expand-btn" onclick="expandCols()" id="colBtn">
+                    Show all 205 columns
+                </button>
+                <button class="expand-btn" onclick="expandRows()" id="rowBtn">
+                    Show all 19 rows
+                </button>
+            </div>
 
-        <!-- Table container -->
-        <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
-            <table class="modal-table" id="previewTable">
-                <thead id="previewHead">
-                    <tr><th>Library</th><th>2008-04</th><th>2008-05</th><th>2008-06</th><th>2008-07</th><th>2008-08</th><th>2008-09</th><th>2008-10</th><th>2008-11</th><th>2008-12</th><th>2009-01</th><th>2009-02</th><th>2009-03</th><th>2009-04</th><th>2009-05</th><th>2009-06</th><th>2009-07</th><th>2009-08</th><th>2009-09</th><th>2009-10</th></tr>
-                </thead>
-                <tbody id="previewBody">
-                    <tr><td>Blakelaw</td><td>1048</td><td>1017</td><td>1042</td><td>911</td><td>919</td><td>1037</td><td>1280</td><td>1020</td><td>644</td><td>895</td><td>829</td><td>984</td><td>768</td><td>793</td><td>1107</td><td>1011</td><td>967</td><td>801</td><td>1094</td></tr>
+            <!-- Table container — horizontally and vertically scrollable -->
+            <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+                <table class="modal-table" id="previewTable">
+                    <thead id="previewHead">
+                        <tr><th>Library</th><th>2008-04</th><th>2008-05</th><th>2008-06</th><th>2008-07</th><th>2008-08</th><th>2008-09</th><th>2008-10</th><th>2008-11</th><th>2008-12</th><th>2009-01</th><th>2009-02</th><th>2009-03</th><th>2009-04</th><th>2009-05</th><th>2009-06</th><th>2009-07</th><th>2009-08</th><th>2009-09</th><th>2009-10</th></tr>
+                    </thead>
+                    <tbody id="previewBody">
+                        <tr><td>Blakelaw</td><td>1048</td><td>1017</td><td>1042</td><td>911</td><td>919</td><td>1037</td><td>1280</td><td>1020</td><td>644</td><td>895</td><td>829</td><td>984</td><td>768</td><td>793</td><td>1107</td><td>1011</td><td>967</td><td>801</td><td>1094</td></tr>
 <tr><td>City</td><td>4490</td><td>4424</td><td>4606</td><td>5709</td><td>4555</td><td>4028</td><td>3716</td><td>3167</td><td>2989</td><td>5583</td><td>2910</td><td>3594</td><td>1819</td><td>1786</td><td>43772</td><td>56618</td><td>56341</td><td>52201</td><td>54330</td></tr>
 <tr><td>Cruddas Park</td><td>1477</td><td>1457</td><td>1377</td><td>1697</td><td>1749</td><td>1522</td><td>1563</td><td>1498</td><td>909</td><td>1566</td><td>1352</td><td>1267</td><td>1517</td><td>1023</td><td>1281</td><td>1164</td><td>1085</td><td>1227</td><td>1111</td></tr>
 <tr><td>Denton Burn</td><td>4292</td><td>4276</td><td>3925</td><td>4544</td><td>5068</td><td>4366</td><td>4553</td><td>3729</td><td>2865</td><td>4018</td><td>3687</td><td>4121</td><td>4516</td><td>4166</td><td>4169</td><td>6117</td><td>5256</td><td>4463</td><td>4670</td></tr>
@@ -114,14 +346,15 @@
 <tr><td>Walker</td><td>2602</td><td>2736</td><td>3066</td><td>3526</td><td>3211</td><td>2763</td><td>2948</td><td>2449</td><td>1956</td><td>2930</td><td>2811</td><td>3053</td><td>2314</td><td>2161</td><td>2416</td><td>2666</td><td>2240</td><td>2611</td><td>2133</td></tr>
 <tr><td>West End</td><td>2274</td><td>2054</td><td>2109</td><td>2512</td><td>2758</td><td>2417</td><td>2115</td><td>3601</td><td>3745</td><td>4641</td><td>5252</td><td>5180</td><td>5123</td><td>4476</td><td>5143</td><td>6328</td><td>5256</td><td>4509</td><td>4529</td></tr>
 
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
     <script>
-    // Store all data states for the preview modal
+    // Store all four data state combinations for the preview modal.
+    // These are pre-built at report generation time to avoid re-fetching data.
     var _allHeaders = `<tr><th>Library</th><th>2008-04</th><th>2008-05</th><th>2008-06</th><th>2008-07</th><th>2008-08</th><th>2008-09</th><th>2008-10</th><th>2008-11</th><th>2008-12</th><th>2009-01</th><th>2009-02</th><th>2009-03</th><th>2009-04</th><th>2009-05</th><th>2009-06</th><th>2009-07</th><th>2009-08</th><th>2009-09</th><th>2009-10</th><th>2009-11</th><th>2009-12</th><th>2010-01</th><th>2010-02</th><th>2010-03</th><th>2010-04</th><th>2010-05</th><th>2010-06</th><th>2010-07</th><th>2010-08</th><th>2010-09</th><th>2010-10</th><th>2010-11</th><th>2010-12</th><th>2011-01</th><th>2011-02</th><th>2011-03</th><th>2011-04</th><th>2011-05</th><th>2011-06</th><th>2011-07</th><th>2011-08</th><th>2011-09</th><th>2011-10</th><th>2011-11</th><th>2011-12</th><th>2012-01</th><th>2012-02</th><th>2012-03</th><th>2012-04</th><th>2012-05</th><th>2012-06</th><th>2012-07</th><th>2012-08</th><th>2012-09</th><th>2012-10</th><th>2012-11</th><th>2012-12</th><th>2013-01</th><th>2013-02</th><th>2013-03</th><th>2013-04</th><th>2013-05</th><th>2013-06</th><th>2013-07</th><th>2013-08</th><th>2013-09</th><th>2013-10</th><th>2013-11</th><th>2013-12</th><th>2014-01</th><th>2014-02</th><th>2014-03</th><th>2014-04</th><th>2014-05</th><th>2014-06</th><th>2014-07</th><th>2014-08</th><th>2014-09</th><th>2014-10</th><th>2014-11</th><th>2014-12</th><th>2015-01</th><th>2015-02</th><th>2015-03</th><th>2015-04</th><th>2015-05</th><th>2015-06</th><th>2015-07</th><th>2015-08</th><th>2015-09</th><th>2015-10</th><th>2015-11</th><th>2015-12</th><th>2016-01</th><th>2016-02</th><th>2016-03</th><th>2016-04</th><th>2016-05</th><th>2016-06</th><th>2016-07</th><th>2016-08</th><th>2016-09</th><th>2016-10</th><th>2016-11</th><th>2016-12</th><th>2017-01</th><th>2017-02</th><th>2017-03</th><th>2017-04</th><th>2017-05</th><th>2017-06</th><th>2017-07</th><th>2017-08</th><th>2017-09</th><th>2017-10</th><th>2017-11</th><th>2017-12</th><th>2018-01</th><th>2018-02</th><th>2018-03</th><th>2018-04</th><th>2018-05</th><th>2018-06</th><th>2018-07</th><th>2018-08</th><th>2018-09</th><th>2018-10</th><th>2018-11</th><th>2018-12</th><th>2019-01</th><th>2019-02</th><th>2019-03</th><th>2019-04</th><th>2019-05</th><th>2019-06</th><th>2019-07</th><th>2019-08</th><th>2019-09</th><th>2019-10</th><th>2019-11</th><th>2019-12</th><th>2020-01</th><th>2020-02</th><th>2020-03</th><th>2020-04</th><th>2020-05</th><th>2020-06</th><th>2020-07</th><th>2020-08</th><th>2020-09</th><th>2020-10</th><th>2020-11</th><th>2020-12</th><th>2021-01</th><th>2021-02</th><th>2021-03</th><th>2021-04</th><th>2021-05</th><th>2021-06</th><th>2021-07</th><th>2021-08</th><th>2021-09</th><th>2021-10</th><th>2021-11</th><th>2021-12</th><th>2022-01</th><th>2022-02</th><th>2022-03</th><th>2022-04</th><th>2022-05</th><th>2022-06</th><th>2022-07</th><th>2022-08</th><th>2022-09</th><th>2022-10</th><th>2022-11</th><th>2022-12</th><th>2023-1</th><th>2023-2</th><th>2023-3</th><th>2023-4</th><th>2023-5</th><th>2023-6</th><th>2023-7</th><th>2023-8</th><th>2023-9</th><th>2023-10</th><th>2023-11</th><th>2023-12</th><th>2024-1</th><th>2024-2</th><th>2024-3</th><th>2024-4</th><th>2024-5</th><th>2024-6</th><th>2024-7</th><th>2024-8</th><th>2024-9</th><th>2024-10</th><th>2024-11</th><th>2024-12</th><th>2025-1</th><th>2025-2</th><th>2025-3</th></tr>`;
     var _defaultHeaders = `<tr><th>Library</th><th>2008-04</th><th>2008-05</th><th>2008-06</th><th>2008-07</th><th>2008-08</th><th>2008-09</th><th>2008-10</th><th>2008-11</th><th>2008-12</th><th>2009-01</th><th>2009-02</th><th>2009-03</th><th>2009-04</th><th>2009-05</th><th>2009-06</th><th>2009-07</th><th>2009-08</th><th>2009-09</th><th>2009-10</th></tr>`;
     var _defaultRows = `<tr><td>Blakelaw</td><td>1048</td><td>1017</td><td>1042</td><td>911</td><td>919</td><td>1037</td><td>1280</td><td>1020</td><td>644</td><td>895</td><td>829</td><td>984</td><td>768</td><td>793</td><td>1107</td><td>1011</td><td>967</td><td>801</td><td>1094</td></tr>
@@ -208,56 +441,62 @@
     var showingAllCols = false;
     var showingAllRows = false;
 
-function openPreview() {
-    // Reset to default view each time modal opens
-    showingAllCols = false;
-    showingAllRows = false;
-    document.getElementById('previewHead').innerHTML = _defaultHeaders;
-    document.getElementById('previewBody').innerHTML = _defaultRows;
-    document.getElementById('colLabel').textContent = 'first 20';
-    document.getElementById('rowLabel').textContent = 'first 20';
-    document.getElementById('colBtn').style.display = 'inline-block';
-    document.getElementById('rowBtn').style.display = 'inline-block';
-    document.getElementById('dataModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function closePreview() {
-    document.getElementById('dataModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function closeOnOverlay(event) {
-    // Close if user clicks the dark overlay, not the modal box itself
-    if (event.target === document.getElementById('dataModal')) {
-        closePreview();
+    function openPreview() {
+        // Reset to default view each time modal opens
+        showingAllCols = false;
+        showingAllRows = false;
+        document.getElementById('previewHead').innerHTML = _defaultHeaders;
+        document.getElementById('previewBody').innerHTML = _defaultRows;
+        document.getElementById('colLabel').textContent = 'first 20';
+        document.getElementById('rowLabel').textContent = 'first 20';
+        document.getElementById('colBtn').style.display = 'inline-block';
+        document.getElementById('rowBtn').style.display = 'inline-block';
+        document.getElementById('dataModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
     }
-}
 
-function expandCols() {
-    // Switch to all columns view
-    showingAllCols = true;
-    document.getElementById('previewHead').innerHTML = _allHeaders;
-    document.getElementById('previewBody').innerHTML = 
-        showingAllRows ? _allDataAllCols : _allRows;
-    document.getElementById('colLabel').textContent = 'all';
-    document.getElementById('colBtn').style.display = 'none';
-}
+    function closePreview() {
+        document.getElementById('dataModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
 
-function expandRows() {
-    // Switch to all rows view
-    showingAllRows = true;
-    document.getElementById('previewBody').innerHTML = 
-        showingAllCols ? _allDataAllCols : _allDataRows;
-    document.getElementById('rowLabel').textContent = 'all';
-    document.getElementById('rowBtn').style.display = 'none';
-}
-</script>
+    function closeOnOverlay(event) {
+        // Close if user clicks the dark overlay, not the modal box itself
+        if (event.target === document.getElementById('dataModal')) {
+            closePreview();
+        }
+    }
+
+    function expandCols() {
+        // Switch to all columns view
+        showingAllCols = true;
+        document.getElementById('previewHead').innerHTML = _allHeaders;
+        document.getElementById('previewBody').innerHTML =
+            showingAllRows ? _allDataAllCols : _allRows;
+        document.getElementById('colLabel').textContent = 'all';
+        document.getElementById('colBtn').style.display = 'none';
+    }
+
+    function expandRows() {
+        // Switch to all rows view
+        showingAllRows = true;
+        document.getElementById('previewBody').innerHTML =
+            showingAllCols ? _allDataAllCols : _allDataRows;
+        document.getElementById('rowLabel').textContent = 'all';
+        document.getElementById('rowBtn').style.display = 'none';
+    }
+    </script>
 
 </div>
+
+<!-- =========================================================================
+     Missingness Distribution
+     Chart.js horizontal bar chart — top 20 partial columns by missing fraction.
+     Requires internet connection to load Chart.js from CDN.
+========================================================================== -->
 <h2 class="section-toggle" onclick="toggleSection(this)">Missingness Distribution</h2>
 <div class="section-content">
-
+  
     <!-- Missingness bar chart — rendered using Chart.js 4.4.0 via CDN -->
     <!-- Requires internet connection to load the Chart.js library -->
     <canvas id="missingnessChart" style="max-height:500px;"></canvas>
@@ -278,16 +517,16 @@ function expandRows() {
                 }]
             },
             options: {
-            // indexAxis: 'y' makes this a horizontal bar chart
-            // which is easier to read for long column names
+                // indexAxis: 'y' makes this a horizontal bar chart
+                // which is easier to read for long column names
                 indexAxis: 'y',
                 responsive: true,
                 plugins: {
-                // Hide the legend since colours are self-explanatory
+                    // Hide the legend since colours are self-explanatory
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                        // Format tooltip to show percentage
+                            // Format tooltip to show percentage
                             label: function(context) {
                                 return context.parsed.x.toFixed(1) + '% missing';
                             }
@@ -314,51 +553,67 @@ function expandRows() {
     </p>
 </div>
 
+<!-- =========================================================================
+     Column Profiles
+     Filterable, searchable, paginated table of per-column profiling results.
+========================================================================== -->
 <h2 class="section-toggle" onclick="toggleSection(this)">Column Profiles</h2>
 <div class="section-content">
-<div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+
+  <!-- Filter controls -->
+  <div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+
     <!-- Filter by missingness class -->
     <div>
-        <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
-            Filter by class:
-        </label>
-        <select id="classFilter" onchange="filterTable()"
-                style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
-                       font-size:0.85em;background:#fff;">
-            <option value="all">All columns</option>
-            <option value="structural">Structural</option>
-            <option value="partial">Partial</option>
-            <option value="complete">Complete</option>
-        </select>
+      <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Filter by class:
+      </label>
+      <select id="classFilter" onchange="filterTable()"
+              style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                     font-size:0.85em;background:#fff;">
+        <option value="all">All columns</option>
+        <option value="structural">Structural</option>
+        <option value="partial">Partial</option>
+        <option value="complete">Complete</option>
+      </select>
     </div>
-    <!-- Search by column name (case insensitive) -->
+
+    <!-- Search by column name — case insensitive -->
     <div>
-        <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
-            Search column:
-        </label>
-        <input id="colSearch" type="text" oninput="filterTable()"
-               placeholder="e.g. Library, Date..."
-               style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
-                      font-size:0.85em;width:200px;"/>
+      <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Search column:
+      </label>
+      <input id="colSearch" type="text" oninput="filterTable()"
+             placeholder="e.g. Library, Date..."
+             style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                    font-size:0.85em;width:200px;"/>
     </div>
-    <!-- Row count indicator -->
+
+    <!-- Row count indicator and show-all button -->
     <div id="rowCount" style="font-size:0.82em;color:#999;margin-left:auto;"></div>
     <button id="showAllBtn" onclick="showAll()"
             style="display:none;padding:6px 14px;background:#2c3e50;color:#fff;
                    border:none;border-radius:4px;font-size:0.82em;cursor:pointer;">
-        Show all columns
+      Show all columns
     </button>
-</div>
-<table id="profileTable">
-<thead>
-<tr>
-  <th>Column</th><th>Type</th><th>Missing</th><th>Class</th>
-  <th>Unique</th><th>Constant?</th>
-  <th>Sentinel Flags</th><th>Example Value</th>
-</tr>
-</thead>
-<tbody>
-<tr><td>Library</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">text</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>19</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>Blakelaw</td></tr>
+  </div>
+
+  <!-- Column profiles table -->
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Missing</th>
+        <th>Class</th>
+        <th>Unique</th>
+        <th>Constant?</th>
+        <th>Sentinel Flags</th>
+        <th>Example Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Library</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">text</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>19</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>Blakelaw</td></tr>
 <tr><td>2008-04</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>19</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1048</td></tr>
 <tr><td>2008-05</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>19</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1017</td></tr>
 <tr><td>2008-06</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>19</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1042</td></tr>
@@ -564,38 +819,62 @@ function expandRows() {
 <tr><td>2025-2</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>19 (100.0%)</td><td><span style="background:#c0392b;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">structural</span></td><td>0</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>—</td></tr>
 <tr><td>2025-3</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>19 (100.0%)</td><td><span style="background:#c0392b;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">structural</span></td><td>0</td><td>No</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>—</td></tr>
 
-</tbody>
-</table>
+    </tbody>
+  </table>
 </div>
 
+<!-- =========================================================================
+     Validation Results
+     Colour-coded list of validation errors and warnings.
+========================================================================== -->
 <h2 class="section-toggle" onclick="toggleSection(this)">Validation Results</h2>
 <div class="section-content">
-<p style='color:#27ae60;font-weight:600;'>No validation issues detected.</p>
+  <p style='color:#27ae60;font-weight:600;'>No validation issues detected.</p>
 </div>
 
+<!-- =========================================================================
+     Missingness Summary
+     Aggregated missingness metrics across the full dataset.
+========================================================================== -->
 <h2 class="section-toggle" onclick="toggleSection(this)">Missingness Summary</h2>
 <div class="section-content">
-<table>
-<thead><tr><th>Metric</th><th>Value</th></tr></thead>
-<tbody>
-<tr><td>Total Nan Values</td><td>744</td></tr><tr><td>Total Blank String Values</td><td>0</td></tr><tr><td>Total Text Sentinel Values</td><td>0</td></tr><tr><td>Numeric Sentinel Flagged Cols</td><td>1</td></tr><tr><td>Columns With Any Missingness</td><td>148</td></tr>
-</tbody>
-</table>
+  <table>
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Total Nan Values</td><td>744</td></tr><tr><td>Total Blank String Values</td><td>0</td></tr><tr><td>Total Text Sentinel Values</td><td>0</td></tr><tr><td>Numeric Sentinel Flagged Cols</td><td>1</td></tr><tr><td>Columns With Any Missingness</td><td>148</td></tr>
+    </tbody>
+  </table>
 </div>
 
+<!-- =========================================================================
+     Profiler Warnings (injected only if warnings exist)
+========================================================================== -->
 <h2 class='section-toggle' onclick='toggleSection(this)'>Profiler Warnings</h2><div class='section-content'><p>⚠ Column '2011-05': potential sentinel value(s) detected — manual contextual validation recommended: [{'value': 999, 'count': 1}]</p><p>⚠ 7 structural (100% missing) column(s) detected. These are excluded from downstream validation steps.</p></div>
-<div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
-<script>
-// Default number of rows to display before user clicks "Show all"
-// Filter the column profiles table by missingness class and/or column name.
-// Filters are applied simultaneously on every change.
-var showAllRows = false;
-var PAGE_SIZE = 10;
 
-function filterTable(event) {
+<!-- =========================================================================
+     Footer
+========================================================================== -->
+<div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
+
+<!-- =========================================================================
+     JavaScript
+     All interactive behaviour is defined here and operates on the static
+     HTML structure above. No external JS dependencies except Chart.js
+     (loaded inline by the chart placeholder when needed).
+========================================================================== -->
+<script>
+  // -------------------------------------------------------------------------
+  // Column profiles table — filter, search, and pagination
+  // -------------------------------------------------------------------------
+
+  // Number of rows to show by default before "Show all" is clicked
+  var showAllRows = false;
+  var PAGE_SIZE = 10;
+
+  function filterTable(event) {
     // When filters change, reset back to paginated view
     if (event && event.type !== 'click') {
-        showAllRows = false;
+      showAllRows = false;
     }
 
     var classFilter = document.getElementById('classFilter').value.toLowerCase();
@@ -606,62 +885,72 @@ function filterTable(event) {
 
     // First pass — find all rows matching current filters
     rows.forEach(function(row) {
-        var colName = row.cells[0].textContent.toLowerCase();
-        var missClass = row.cells[3].textContent.toLowerCase().trim();
-        var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
-        var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
+      var colName = row.cells[0].textContent.toLowerCase();
+      // Missingness class badge text is in the fourth cell (index 3)
+      var missClass = row.cells[3].textContent.toLowerCase().trim();
+      var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
+      var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
 
-        if (matchesClass && matchesSearch) {
-            matchedRows.push(row);
-        } else {
-            // Hide rows that don't match filters at all
-            row.style.display = 'none';
-        }
+      if (matchesClass && matchesSearch) {
+        matchedRows.push(row);
+      } else {
+        // Hide rows that don't match filters at all
+        row.style.display = 'none';
+      }
     });
 
     // Second pass — apply pagination to matched rows
     var visibleCount = 0;
     matchedRows.forEach(function(row, index) {
-        if (showAllRows || index < PAGE_SIZE) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+      if (showAllRows || index < PAGE_SIZE) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
     });
 
     // Update row count indicator
     document.getElementById('rowCount').textContent =
-        'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
+      'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
 
-    // Show or hide the "Show all" button
+    // Show or hide the "Show all" button depending on whether pagination is active
     var btn = document.getElementById('showAllBtn');
     if (matchedRows.length > PAGE_SIZE && !showAllRows) {
-        btn.style.display = 'inline-block';
-        btn.textContent = 'Show all ' + matchedRows.length + ' columns ↓';
+      btn.style.display = 'inline-block';
+      btn.textContent = 'Show all ' + matchedRows.length + ' columns';
     } else {
-        btn.style.display = 'none';
+      btn.style.display = 'none';
     }
-}
+  }
 
-function showAll() {
-    // Reveal all matching rows
+  function showAll() {
+    // Reveal all matching rows when the user clicks "Show all"
     showAllRows = true;
     filterTable();
-}
+  }
 
-function toggleSection(header) {
-    // Toggle collapsed state on the header
+  // -------------------------------------------------------------------------
+  // Collapsible sections
+  // -------------------------------------------------------------------------
+
+  function toggleSection(header) {
+    // Toggle collapsed state on the h2 header element
     header.classList.toggle('collapsed');
-    // Find the next sibling section-content div and hide/show it
+    // Find the immediately following section-content div and hide/show it
     var content = header.nextElementSibling;
     if (content && content.classList.contains('section-content')) {
-        content.classList.toggle('hidden');
+      content.classList.toggle('hidden');
     }
-}
+  }
 
-// Run on page load to initialise pagination
-window.onload = function() { filterTable(); };
+  // -------------------------------------------------------------------------
+  // Initialisation — run filter on page load to set initial row count
+  // -------------------------------------------------------------------------
+  window.onload = function() {
+    filterTable();
+  };
 </script>
+
 </body>
 </html>
