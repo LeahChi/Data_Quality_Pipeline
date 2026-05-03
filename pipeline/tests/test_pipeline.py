@@ -376,6 +376,19 @@ class TestLoader(unittest.TestCase):
         finally:
             os.unlink(tmp_path)
 
+    def test_encoding_fallback(self):
+        """A file with Latin-1 encoding should load successfully via fallback."""
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.csv', delete=False) as f:
+            f.write("name,city\nAlice,Café\n".encode('latin-1'))
+            tmp_path = f.name
+        try:
+            result = load_csv(tmp_path, "test")
+            self.assertEqual(result.encoding_used, "latin-1")
+            self.assertIn("latin-1", result.warnings[0])
+        finally:
+            os.unlink(tmp_path)
+
 
 # ---------------------------------------------------------------------------
 # Entry point

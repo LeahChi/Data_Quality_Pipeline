@@ -1,0 +1,232 @@
+{
+  "generated_at": "2026-05-03T00:49:52.683087",
+  "dataset": "Late payment interest 2016-25 updated",
+  "structure": {
+    "num_rows": 8,
+    "num_cols": 9,
+    "structural_cols_count": 2,
+    "complete_cols_count": 7,
+    "partial_cols_count": 0,
+    "structural_cols": [
+      "organisationURI",
+      "serviceTypeURI"
+    ],
+    "columns": [
+      {
+        "column": "extractDate",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 3,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "11/07/2023"
+      },
+      {
+        "column": "organisationURI",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 0,
+        "num_missing": 8,
+        "missing_fraction": 1.0,
+        "missingness_class": "structural",
+        "num_unique": 0,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "\u2014"
+      },
+      {
+        "column": "organisationLabel",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Wakefield"
+      },
+      {
+        "column": "serviceTypeURI",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 0,
+        "num_missing": 8,
+        "missing_fraction": 1.0,
+        "missingness_class": "structural",
+        "num_unique": 0,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "\u2014"
+      },
+      {
+        "column": "serviceTypeLabel",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Procurement - Late Interest lists"
+      },
+      {
+        "column": "financialYear",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 8,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "2017/18"
+      },
+      {
+        "column": "invoicesPaidPercentage",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 8,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "96.86%"
+      },
+      {
+        "column": "totalLiability",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 8,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "30,687"
+      },
+      {
+        "column": "interestPaid",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 8,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 7,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "29"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 0,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 0
+    },
+    "columns": [
+      {
+        "column": "extractDate",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "organisationLabel",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "serviceTypeLabel",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "financialYear",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "invoicesPaidPercentage",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "totalLiability",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "interestPaid",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency"
+    ],
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  }
+}

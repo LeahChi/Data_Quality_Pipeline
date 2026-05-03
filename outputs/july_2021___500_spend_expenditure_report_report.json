@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-05-03T01:33:43.696027",
+  "dataset": "july_2021___500_spend_expenditure_report",
+  "structure": {
+    "num_rows": 2010,
+    "num_cols": 6,
+    "structural_cols_count": 0,
+    "complete_cols_count": 6,
+    "partial_cols_count": 0,
+    "structural_cols": [],
+    "columns": [
+      {
+        "column": "Authority",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Bolton MBC"
+      },
+      {
+        "column": "Service Area",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 9,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Adult Services"
+      },
+      {
+        "column": "Subject Description",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 129,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Other Agency/Contracted Services"
+      },
+      {
+        "column": "Payment Data",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 30,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "21-Jul-21"
+      },
+      {
+        "column": "Amount",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1348,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1,174.33"
+      },
+      {
+        "column": "Supplier Name",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2010,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 580,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Your Choice Homecare"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 0,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 0
+    },
+    "columns": [
+      {
+        "column": "Authority",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Service Area",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Subject Description",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Payment Data",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Amount",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Supplier Name",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency"
+    ],
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  }
+}

@@ -1,0 +1,1108 @@
+{
+  "generated_at": "2026-05-02T23:49:03.540702",
+  "dataset": "Diversity_Data",
+  "structure": {
+    "num_rows": 1,
+    "num_cols": 35,
+    "structural_cols_count": 0,
+    "complete_cols_count": 35,
+    "partial_cols_count": 0,
+    "structural_cols": [],
+    "columns": [
+      {
+        "column": "published",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "2020-07-30"
+      },
+      {
+        "column": "organisation",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "University of Leeds"
+      },
+      {
+        "column": "employees",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "9239"
+      },
+      {
+        "column": "carer_yes",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "2495"
+      },
+      {
+        "column": "carer_no",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "4250"
+      },
+      {
+        "column": "carer_prefernottosay",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "646"
+      },
+      {
+        "column": "carer_undisclosed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1848"
+      },
+      {
+        "column": "disability_yes",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "555"
+      },
+      {
+        "column": "disability_no",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "7206"
+      },
+      {
+        "column": "disability_prefernottosay",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "739"
+      },
+      {
+        "column": "disability_undisclosed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "739"
+      },
+      {
+        "column": "ethnicity_asian",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "647"
+      },
+      {
+        "column": "ethnicity_black",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "ethnicity_mixed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "ethnicity_other",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "92"
+      },
+      {
+        "column": "ethnicity_white",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "6653"
+      },
+      {
+        "column": "ethnicity_prefernottosay",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "740"
+      },
+      {
+        "column": "ethnicity_undisclosed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "647"
+      },
+      {
+        "column": "gender_female",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "5081"
+      },
+      {
+        "column": "gender_male",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "4158"
+      },
+      {
+        "column": "religion_buddhist",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "92"
+      },
+      {
+        "column": "religion_christian",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "2125"
+      },
+      {
+        "column": "religion_hindu",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "92"
+      },
+      {
+        "column": "religion_jewish",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "92"
+      },
+      {
+        "column": "religion_muslim",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "religion_no",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "3512"
+      },
+      {
+        "column": "religion_other",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "religion_sikh",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "92"
+      },
+      {
+        "column": "religion_prefernottosay",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1016"
+      },
+      {
+        "column": "religion_undisclosed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1848"
+      },
+      {
+        "column": "sexuality_bisexual",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "sexuality_gaylesbian",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "185"
+      },
+      {
+        "column": "sexuality_straight",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "5913"
+      },
+      {
+        "column": "sexuality_prefernottosay",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1016"
+      },
+      {
+        "column": "sexuality_undisclosed",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 1,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 1,
+        "is_constant": true,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1848"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 0,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 0
+    },
+    "columns": [
+      {
+        "column": "published",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "organisation",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "employees",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "carer_yes",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "carer_no",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "carer_prefernottosay",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "carer_undisclosed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "disability_yes",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "disability_no",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "disability_prefernottosay",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "disability_undisclosed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_asian",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_black",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_mixed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_other",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_white",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_prefernottosay",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ethnicity_undisclosed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "gender_female",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "gender_male",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_buddhist",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_christian",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_hindu",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_jewish",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_muslim",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_no",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_other",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_sikh",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_prefernottosay",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "religion_undisclosed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "sexuality_bisexual",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "sexuality_gaylesbian",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "sexuality_straight",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "sexuality_prefernottosay",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "sexuality_undisclosed",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency",
+      "rule_no_negatives",
+      "rule_no_constant_columns",
+      "rule_integers_only"
+    ],
+    "error_count": 0,
+    "warning_count": 33,
+    "issues": [
+      {
+        "column": "employees",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "carer_yes",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "carer_no",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "carer_prefernottosay",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "carer_undisclosed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "disability_yes",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "disability_no",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "disability_prefernottosay",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "disability_undisclosed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_asian",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_black",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_mixed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_other",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_white",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_prefernottosay",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "ethnicity_undisclosed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "gender_female",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "gender_male",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_buddhist",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_christian",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_hindu",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_jewish",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_muslim",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_no",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_other",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_sikh",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_prefernottosay",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "religion_undisclosed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "sexuality_bisexual",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "sexuality_gaylesbian",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "sexuality_straight",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "sexuality_prefernottosay",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      },
+      {
+        "column": "sexuality_undisclosed",
+        "rule": "no_constant_columns",
+        "severity": "warning",
+        "message": "Column has only one unique value \u2014 may be uninformative or erroneous.",
+        "affected_count": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,560 @@
+{
+  "generated_at": "2026-05-03T01:35:38.759004",
+  "dataset": "Performance Commitment 5 - Leakage converted",
+  "structure": {
+    "num_rows": 2523,
+    "num_cols": 18,
+    "structural_cols_count": 0,
+    "complete_cols_count": 6,
+    "partial_cols_count": 12,
+    "structural_cols": [],
+    "columns": [
+      {
+        "column": "Distribution metering area",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 2523,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "A011"
+      },
+      {
+        "column": "Latitude",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2475,
+        "num_missing": 48,
+        "missing_fraction": 0.019,
+        "missingness_class": "partial",
+        "num_unique": 2451,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "53.538374"
+      },
+      {
+        "column": "Longitude",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2475,
+        "num_missing": 48,
+        "missing_fraction": 0.019,
+        "missingness_class": "partial",
+        "num_unique": 2453,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "-1.3903579"
+      },
+      {
+        "column": "Area Name",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 2472,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "MILANO RISE BARNSLEY"
+      },
+      {
+        "column": "Ownership area",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 21,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Barnsley"
+      },
+      {
+        "column": "Functional Area",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 2522,
+        "num_missing": 1,
+        "missing_fraction": 0.0004,
+        "missingness_class": "partial",
+        "num_unique": 26,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Barnsley"
+      },
+      {
+        "column": "Apr-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2493,
+        "num_missing": 30,
+        "missing_fraction": 0.0119,
+        "missingness_class": "partial",
+        "num_unique": 349,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.006"
+      },
+      {
+        "column": "May-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2493,
+        "num_missing": 30,
+        "missing_fraction": 0.0119,
+        "missingness_class": "partial",
+        "num_unique": 339,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.005"
+      },
+      {
+        "column": "Jun-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2494,
+        "num_missing": 29,
+        "missing_fraction": 0.0115,
+        "missingness_class": "partial",
+        "num_unique": 338,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.007"
+      },
+      {
+        "column": "Jul-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2494,
+        "num_missing": 29,
+        "missing_fraction": 0.0115,
+        "missingness_class": "partial",
+        "num_unique": 349,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.011"
+      },
+      {
+        "column": "Aug-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2494,
+        "num_missing": 29,
+        "missing_fraction": 0.0115,
+        "missingness_class": "partial",
+        "num_unique": 346,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.006"
+      },
+      {
+        "column": "Sep-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2495,
+        "num_missing": 28,
+        "missing_fraction": 0.0111,
+        "missingness_class": "partial",
+        "num_unique": 347,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.003"
+      },
+      {
+        "column": "Oct-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2499,
+        "num_missing": 24,
+        "missing_fraction": 0.0095,
+        "missingness_class": "partial",
+        "num_unique": 345,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.003"
+      },
+      {
+        "column": "Nov-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2513,
+        "num_missing": 10,
+        "missing_fraction": 0.004,
+        "missingness_class": "partial",
+        "num_unique": 346,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.005"
+      },
+      {
+        "column": "Dec-18",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2519,
+        "num_missing": 4,
+        "missing_fraction": 0.0016,
+        "missingness_class": "partial",
+        "num_unique": 352,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.005"
+      },
+      {
+        "column": "Jan-19",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 351,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.006"
+      },
+      {
+        "column": "Feb-19",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 359,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.006"
+      },
+      {
+        "column": "Mar-19",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 2523,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 333,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "0.001"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 310,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 12
+    },
+    "columns": [
+      {
+        "column": "Distribution metering area",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Latitude",
+        "inferred_type": "numeric",
+        "nan_count": 48,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 48,
+        "notes": []
+      },
+      {
+        "column": "Longitude",
+        "inferred_type": "text",
+        "nan_count": 48,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 48,
+        "notes": []
+      },
+      {
+        "column": "Area Name",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Ownership area",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Functional Area",
+        "inferred_type": "text",
+        "nan_count": 1,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 1,
+        "notes": []
+      },
+      {
+        "column": "Apr-18",
+        "inferred_type": "numeric",
+        "nan_count": 30,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 30,
+        "notes": []
+      },
+      {
+        "column": "May-18",
+        "inferred_type": "numeric",
+        "nan_count": 30,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 30,
+        "notes": []
+      },
+      {
+        "column": "Jun-18",
+        "inferred_type": "numeric",
+        "nan_count": 29,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 29,
+        "notes": []
+      },
+      {
+        "column": "Jul-18",
+        "inferred_type": "numeric",
+        "nan_count": 29,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 29,
+        "notes": []
+      },
+      {
+        "column": "Aug-18",
+        "inferred_type": "numeric",
+        "nan_count": 29,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 29,
+        "notes": []
+      },
+      {
+        "column": "Sep-18",
+        "inferred_type": "numeric",
+        "nan_count": 28,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 28,
+        "notes": []
+      },
+      {
+        "column": "Oct-18",
+        "inferred_type": "numeric",
+        "nan_count": 24,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 24,
+        "notes": []
+      },
+      {
+        "column": "Nov-18",
+        "inferred_type": "numeric",
+        "nan_count": 10,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 10,
+        "notes": []
+      },
+      {
+        "column": "Dec-18",
+        "inferred_type": "numeric",
+        "nan_count": 4,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 4,
+        "notes": []
+      },
+      {
+        "column": "Jan-19",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Feb-19",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Mar-19",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency",
+      "rule_no_negatives",
+      "rule_no_constant_columns",
+      "rule_integers_only"
+    ],
+    "error_count": 0,
+    "warning_count": 13,
+    "issues": [
+      {
+        "column": "Latitude",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2475 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2475
+      },
+      {
+        "column": "Apr-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2367 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2367
+      },
+      {
+        "column": "May-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2369 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2369
+      },
+      {
+        "column": "Jun-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2373 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2373
+      },
+      {
+        "column": "Jul-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2385 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2385
+      },
+      {
+        "column": "Aug-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2381 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2381
+      },
+      {
+        "column": "Sep-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2370 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2370
+      },
+      {
+        "column": "Oct-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2370 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2370
+      },
+      {
+        "column": "Nov-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2386 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2386
+      },
+      {
+        "column": "Dec-18",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2413 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2413
+      },
+      {
+        "column": "Jan-19",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2416 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2416
+      },
+      {
+        "column": "Feb-19",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2422 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2422
+      },
+      {
+        "column": "Mar-19",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "2404 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 2404
+      }
+    ]
+  }
+}

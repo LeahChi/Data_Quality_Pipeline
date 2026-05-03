@@ -1,0 +1,292 @@
+{
+  "generated_at": "2026-05-03T01:49:42.541533",
+  "dataset": "listed_buildings",
+  "structure": {
+    "num_rows": 778,
+    "num_cols": 11,
+    "structural_cols_count": 1,
+    "complete_cols_count": 7,
+    "partial_cols_count": 3,
+    "structural_cols": [
+      "end-date"
+    ],
+    "columns": [
+      {
+        "column": "WKT",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 777,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "MULTIPOLYGON (((-1.74101496713491 54.982350750426,"
+      },
+      {
+        "column": "ogc_fid",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 778,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1"
+      },
+      {
+        "column": "name",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 774,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "HAWTHORN TOMB ABOUT 25 METRES SOUTH OF CHURCH OF S"
+      },
+      {
+        "column": "notes",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 681,
+        "num_missing": 97,
+        "missing_fraction": 0.1247,
+        "missingness_class": "partial",
+        "num_unique": 651,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Hawthorn tomb about 25 metres south of Church of S"
+      },
+      {
+        "column": "start-date",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 685,
+        "num_missing": 93,
+        "missing_fraction": 0.1195,
+        "missingness_class": "partial",
+        "num_unique": 84,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "30/03/1987"
+      },
+      {
+        "column": "entry-date",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 685,
+        "num_missing": 93,
+        "missing_fraction": 0.1195,
+        "missingness_class": "partial",
+        "num_unique": 95,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "30/03/1987"
+      },
+      {
+        "column": "document-url",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 770,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "https://historicengland.org.uk/listing/the-list/li"
+      },
+      {
+        "column": "reference",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 770,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1299396"
+      },
+      {
+        "column": "listed-building-grade",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 3,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "Grade II"
+      },
+      {
+        "column": "listed-building",
+        "dtype": "int64",
+        "inferred_type": "numeric",
+        "num_values": 778,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 770,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "1299396"
+      },
+      {
+        "column": "end-date",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 0,
+        "num_missing": 778,
+        "missing_fraction": 1.0,
+        "missingness_class": "structural",
+        "num_unique": 0,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "\u2014"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 283,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 3
+    },
+    "columns": [
+      {
+        "column": "WKT",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "ogc_fid",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "name",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "notes",
+        "inferred_type": "text",
+        "nan_count": 97,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 97,
+        "notes": []
+      },
+      {
+        "column": "start-date",
+        "inferred_type": "text",
+        "nan_count": 93,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 93,
+        "notes": []
+      },
+      {
+        "column": "entry-date",
+        "inferred_type": "text",
+        "nan_count": 93,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 93,
+        "notes": []
+      },
+      {
+        "column": "document-url",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "reference",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "listed-building-grade",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "listed-building",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency",
+      "rule_no_negatives",
+      "rule_no_constant_columns",
+      "rule_integers_only"
+    ],
+    "error_count": 0,
+    "warning_count": 0,
+    "issues": []
+  }
+}
