@@ -88,6 +88,15 @@ def load_csv(
         warnings.append(
             f"Primary encoding '{encoding}' failed; loaded with '{fallback_encoding}'."
         )
+    except pd.errors.EmptyDataError:
+        raise ValueError(
+            f"Dataset file is empty and contains no columns: {filepath}"
+        )
+
+    if df.empty and len(df.columns) == 0:
+        raise ValueError(
+            f"Dataset file contains no columns: {filepath}"
+        )
 
     return LoadResult(
         df=df,
