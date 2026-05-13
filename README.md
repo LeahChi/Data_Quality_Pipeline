@@ -1,6 +1,6 @@
 # Data Quality Profiling Pipeline
 
-A schema-agnostic data quality pipeline for open datasets.
+A data quality pipeline for open datasets.
 Automatically profiles CSV datasets without prior knowledge of their structure or content.
 
 ## What it does
