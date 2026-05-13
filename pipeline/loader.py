@@ -75,6 +75,11 @@ def load_csv(
     path = Path(filepath)
     if not path.exists():
         raise FileNotFoundError(f"Dataset file not found: {filepath}")
+    
+    if path.suffix.lower() != '.csv':
+        raise ValueError(
+            f"Unsupported file format '{path.suffix}'. "
+            f"The pipeline only supports CSV files: {filepath}")
 
     name = dataset_name or path.stem  # .stem gives you the filename without its extension
     warnings = []
