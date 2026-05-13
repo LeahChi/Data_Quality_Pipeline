@@ -75,6 +75,11 @@ def load_csv(
     path = Path(filepath)
     if not path.exists():
         raise FileNotFoundError(f"Dataset file not found: {filepath}")
+    
+    if path.suffix.lower() != '.csv':
+        raise ValueError(
+            f"Unsupported file format '{path.suffix}'. "
+            f"The pipeline only supports CSV files: {filepath}")
 
     name = dataset_name or path.stem  # .stem gives you the filename without its extension
     warnings = []
@@ -87,6 +92,15 @@ def load_csv(
         encoding_used = fallback_encoding
         warnings.append(
             f"Primary encoding '{encoding}' failed; loaded with '{fallback_encoding}'."
+        )
+    except pd.errors.EmptyDataError:
+        raise ValueError(
+            f"Dataset file is empty and contains no columns: {filepath}"
+        )
+
+    if df.empty and len(df.columns) == 0:
+        raise ValueError(
+            f"Dataset file contains no columns: {filepath}"
         )
 
     return LoadResult(

@@ -376,6 +376,43 @@ class TestLoader(unittest.TestCase):
         finally:
             os.unlink(tmp_path)
 
+    def test_encoding_fallback(self):
+        """A file with Latin-1 encoding should load successfully via fallback."""
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.csv', delete=False) as f:
+            f.write("name,city\nAlice,Café\n".encode('latin-1'))
+            tmp_path = f.name
+        try:
+            result = load_csv(tmp_path, "test")
+            self.assertEqual(result.encoding_used, "latin-1")
+            self.assertIn("latin-1", result.warnings[0])
+        finally:
+            os.unlink(tmp_path)
+    
+    def test_non_csv_raises_valueerror(self):
+        """A non-CSV file should raise ValueError with a clear message."""
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as f:
+            f.write("test content")
+            tmp_path = f.name
+        try:
+            with self.assertRaises(ValueError):
+                load_csv(tmp_path, "test")
+        finally:
+            os.unlink(tmp_path)
+
+    def test_empty_file_raises_valueerror(self):
+        """A completely empty CSV file should raise ValueError with a clear message."""
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+            f.write("")
+            tmp_path = f.name
+        try:
+            with self.assertRaises(ValueError):
+                load_csv(tmp_path, "test")
+        finally:
+            os.unlink(tmp_path)
+
 
 # ---------------------------------------------------------------------------
 # Entry point

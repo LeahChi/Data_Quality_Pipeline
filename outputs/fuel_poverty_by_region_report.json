@@ -1,0 +1,140 @@
+{
+  "generated_at": "2026-05-03T02:08:12.937685",
+  "dataset": "Fuel poverty by region",
+  "structure": {
+    "num_rows": 10,
+    "num_cols": 4,
+    "structural_cols_count": 0,
+    "complete_cols_count": 4,
+    "partial_cols_count": 0,
+    "structural_cols": [],
+    "columns": [
+      {
+        "column": "Region",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 10,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 10,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "North East"
+      },
+      {
+        "column": "Number of households",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 10,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 10,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": " 1,203,514 "
+      },
+      {
+        "column": "Number of households in fuel poverty",
+        "dtype": "object",
+        "inferred_type": "text",
+        "num_values": 10,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 10,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": " 131,122 "
+      },
+      {
+        "column": "Proportion of households fuel poor (%)",
+        "dtype": "float64",
+        "inferred_type": "numeric",
+        "num_values": 10,
+        "num_missing": 0,
+        "missing_fraction": 0.0,
+        "missingness_class": "complete",
+        "num_unique": 10,
+        "is_constant": false,
+        "sentinel_flags": [],
+        "zero_count": null,
+        "example_value": "10.9"
+      }
+    ]
+  },
+  "missingness": {
+    "summary": {
+      "total_nan_values": 0,
+      "total_blank_string_values": 0,
+      "total_text_sentinel_values": 0,
+      "numeric_sentinel_flagged_cols": 0,
+      "columns_with_any_missingness": 0
+    },
+    "columns": [
+      {
+        "column": "Region",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Number of households",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Number of households in fuel poverty",
+        "inferred_type": "text",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      },
+      {
+        "column": "Proportion of households fuel poor (%)",
+        "inferred_type": "numeric",
+        "nan_count": 0,
+        "blank_string_count": 0,
+        "text_sentinel_count": 0,
+        "numeric_sentinel_flags": [],
+        "total_missing_estimate": 0,
+        "notes": []
+      }
+    ]
+  },
+  "validation": {
+    "rules_applied": [
+      "rule_category_consistency",
+      "rule_no_negatives",
+      "rule_no_constant_columns",
+      "rule_integers_only"
+    ],
+    "error_count": 0,
+    "warning_count": 1,
+    "issues": [
+      {
+        "column": "Proportion of households fuel poor (%)",
+        "rule": "integers_only",
+        "severity": "warning",
+        "message": "8 non-integer value(s) found in column expected to hold counts.",
+        "affected_count": 8
+      }
+    ]
+  }
+}

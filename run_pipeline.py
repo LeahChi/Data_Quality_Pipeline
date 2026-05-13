@@ -52,7 +52,14 @@ def main():
     print(f"{'='*60}")
 
     print(f"\n[1/4] Loading: {args.input}")
-    load_result = load_csv(args.input, dataset_name=args.name)
+    
+    try:
+        load_result = load_csv(args.input, dataset_name=args.name)
+    except ValueError as e:
+        print(f"\n[ERROR] {e}")
+        print("Pipeline halted — please provide a valid CSV file.")
+        sys.exit(1)
+
     print(f"      {load_result.num_rows:,} rows x {load_result.num_cols} columns")
     print(f"      Encoding: {load_result.encoding_used}")
     for w in load_result.warnings:

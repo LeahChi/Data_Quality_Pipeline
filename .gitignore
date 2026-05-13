@@ -3,3 +3,21 @@ __pycache__/
 .ipynb_checkpoints/
 *.pyc
 .DS_Store
+
+# Ignore all data files and reports by default
+data/*.csv
+outputs/*.html
+outputs/*.json
+
+# Keep the three core datasets
+!data/newcastle_loans.csv
+!data/private_water.csv
+!data/market_ds.csv
+
+# Keep the three core reports
+!outputs/newcastle_library_loans_report.html
+!outputs/newcastle_library_loans_report.json
+!outputs/private_water_supplies_report.html
+!outputs/private_water_supplies_report.json
+!outputs/leeds_market_stalls_report.html
+!outputs/leeds_market_stalls_report.json

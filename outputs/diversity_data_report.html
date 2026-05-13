@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<!--
+    report_template.html — HTML template for the Data Quality Pipeline report.
+
+    This file defines the static structure, styling, and interactive behaviour
+    of the generated HTML report. Dynamic content is injected by report.py
+    at generation time via placeholder replacement.
+
+    Placeholders follow the format: PLACEHOLDER:NAME
+    Each placeholder is replaced by report.py with generated HTML content.
+
+    Interactive features:
+        - Collapsible sections (toggleSection)
+        - Column profile filter by missingness class (filterTable)
+        - Column search by name, case insensitive (filterTable)
+        - Paginated column display, 10 rows default (filterTable / showAll)
+        - Missingness bar chart (Chart.js 4.4.0 via CDN)
+        - Raw data preview modal (openPreview / closePreview)
+
+    Note: The Chart.js library is loaded from a CDN. An internet connection
+    is required to render the missingness bar chart when opening the report.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DQ Report: Diversity_Data</title>
+<style>
+  /* -----------------------------------------------------------------------
+     Base layout and typography
+  ----------------------------------------------------------------------- */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px;
+    color: #222;
+    background: #fafafa;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 10px;
+    color: #2c3e50;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-top: 36px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-left: 4px solid #2c3e50;
+    padding-left: 12px;
+  }
+
+  .meta {
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 24px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Dataset overview cards
+  ----------------------------------------------------------------------- */
+  .cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .card {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 2px solid #eee;
+    background: #fff;
+    text-align: center;
+  }
+
+  .card .val {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .card .lbl {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* -----------------------------------------------------------------------
+     Tables
+  ----------------------------------------------------------------------- */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.85em;
+    margin-top: 12px;
+  }
+
+  th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+
+  tr:hover td {
+    background: #f0f4f8;
+  }
+
+  code {
+    background: #eee;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+
+  /* -----------------------------------------------------------------------
+     Footer
+  ----------------------------------------------------------------------- */
+  .footer {
+    margin-top: 48px;
+    font-size: 0.75em;
+    color: #999;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+  }
+
+  /* -----------------------------------------------------------------------
+     Collapsible sections
+     Each h2 with class section-toggle acts as a toggle button.
+     The following sibling div.section-content is shown/hidden.
+  ----------------------------------------------------------------------- */
+  .section-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Arrow indicator — shows "hide" when expanded, "show" when collapsed */
+  .section-toggle::after {
+    content: 'hide ▲';
+    font-size: 0.7em;
+    color: #999;
+    margin-left: 8px;
+  }
+
+  .section-toggle.collapsed::after {
+    content: 'show ▼';
+  }
+
+  .section-content {
+    transition: opacity 0.2s ease;
+  }
+
+  .section-content.hidden {
+    display: none;
+  }
+
+  /* -----------------------------------------------------------------------
+     Raw data preview modal
+  ----------------------------------------------------------------------- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-box {
+    background: #fff;
+    margin: 40px auto;
+    padding: 24px;
+    max-width: 95%;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #666;
+    border: none;
+    background: none;
+  }
+
+  .modal-close:hover {
+    color: #c0392b;
+  }
+
+  /* Modal table — horizontally scrollable for wide datasets */
+  .modal-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82em;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .modal-table th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .modal-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+  }
+
+  .modal-table tr:hover td {
+    background: #f0f4f8;
+  }
+
+  /* -----------------------------------------------------------------------
+     Buttons
+  ----------------------------------------------------------------------- */
+  .preview-btn {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+
+  .preview-btn:hover {
+    background: #34495e;
+  }
+
+  .expand-btn {
+    margin: 8px 4px 0 0;
+    padding: 6px 12px;
+    background: #f0f4f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.82em;
+    cursor: pointer;
+  }
+
+  .expand-btn:hover {
+    background: #e0e8f0;
+  }
+</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     Report header
+========================================================================== -->
+<h1>Data Quality Report: Diversity_Data</h1>
+<p class="meta">
+  Generated: 2026-05-02 23:49 &nbsp;|&nbsp;
+  Rows: <strong>1</strong> &nbsp;|&nbsp;
+  Columns: <strong>35</strong> &nbsp;|&nbsp;
+  Rules applied: rule_category_consistency, rule_no_negatives, rule_no_constant_columns, rule_integers_only
+</p>
+
+<!-- =========================================================================
+     Dataset Overview
+     Shows summary cards and the raw data preview button/modal.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Dataset Overview</h2>
+<div class="section-content">
+  <div class="cards"><div class="card" style="border-color:#c0392b;"><div class="val" style="color:#c0392b;">0</div><div class="lbl">Structural columns<br>(100% missing)</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">0</div><div class="lbl">Partial missingness<br>columns</div></div><div class="card" style="border-color:#27ae60;"><div class="val" style="color:#27ae60;">35</div><div class="lbl">Fully complete<br>columns</div></div><div class="card" style="border-color:#2c3e50;"><div class="val">0</div><div class="lbl">Validation<br>errors</div></div><div class="card" style="border-color:#e67e22;"><div class="val" style="color:#e67e22;">33</div><div class="lbl">Validation<br>warnings</div></div><div class="card" style="border-color:#8e44ad;"><div class="val" style="color:#8e44ad;">0</div><div class="lbl">Duplicate<br>rows</div></div><div class="card" style="border-color:#7f8c8d;"><div class="val" style="color:#7f8c8d;">0</div><div class="lbl">Fully blank<br>rows</div></div></div>
+  
+    <!-- Data Preview Button -->
+    <button class="preview-btn" onclick="openPreview()">
+    Preview Raw Data (1 rows x 35 columns)
+    </button>
+
+    <!-- Modal Overlay -->
+    <div id="dataModal" class="modal-overlay" onclick="closeOnOverlay(event)">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closePreview()">X</button>
+            <h2 style="margin-top:0;font-size:1.1rem;color:#2c3e50;">
+                Raw Data Preview
+            </h2>
+            <p style="font-size:0.82em;color:#666;margin-bottom:8px;">
+                Showing <span id="rowLabel">first 20</span> rows x
+                <span id="colLabel">first 20</span> columns
+                (1 total rows, 35 total columns)
+            </p>
+
+            <!-- Expand buttons -->
+            <div style="margin-bottom:12px;">
+                <button class="expand-btn" onclick="expandCols()" id="colBtn">
+                    Show all 35 columns
+                </button>
+                <button class="expand-btn" onclick="expandRows()" id="rowBtn">
+                    Show all 1 rows
+                </button>
+            </div>
+
+            <!-- Table container — horizontally and vertically scrollable -->
+            <div style="overflow-x:auto;max-height:60vh;overflow-y:auto;">
+                <table class="modal-table" id="previewTable">
+                    <thead id="previewHead">
+                        <tr><th>published</th><th>organisation</th><th>employees</th><th>carer_yes</th><th>carer_no</th><th>carer_prefernottosay</th><th>carer_undisclosed</th><th>disability_yes</th><th>disability_no</th><th>disability_prefernottosay</th><th>disability_undisclosed</th><th>ethnicity_asian</th><th>ethnicity_black</th><th>ethnicity_mixed</th><th>ethnicity_other</th><th>ethnicity_white</th><th>ethnicity_prefernottosay</th><th>ethnicity_undisclosed</th><th>gender_female</th><th>gender_male</th></tr>
+                    </thead>
+                    <tbody id="previewBody">
+                        <tr><td>2020-07-30</td><td>University of Leeds</td><td>9239</td><td>2495</td><td>4250</td><td>646</td><td>1848</td><td>555</td><td>7206</td><td>739</td><td>739</td><td>647</td><td>185</td><td>185</td><td>92</td><td>6653</td><td>740</td><td>647</td><td>5081</td><td>4158</td></tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Store all four data state combinations for the preview modal.
+    // These are pre-built at report generation time to avoid re-fetching data.
+    var _allHeaders = `<tr><th>published</th><th>organisation</th><th>employees</th><th>carer_yes</th><th>carer_no</th><th>carer_prefernottosay</th><th>carer_undisclosed</th><th>disability_yes</th><th>disability_no</th><th>disability_prefernottosay</th><th>disability_undisclosed</th><th>ethnicity_asian</th><th>ethnicity_black</th><th>ethnicity_mixed</th><th>ethnicity_other</th><th>ethnicity_white</th><th>ethnicity_prefernottosay</th><th>ethnicity_undisclosed</th><th>gender_female</th><th>gender_male</th><th>religion_buddhist</th><th>religion_christian</th><th>religion_hindu</th><th>religion_jewish</th><th>religion_muslim</th><th>religion_no</th><th>religion_other</th><th>religion_sikh</th><th>religion_prefernottosay</th><th>religion_undisclosed</th><th>sexuality_bisexual</th><th>sexuality_gaylesbian</th><th>sexuality_straight</th><th>sexuality_prefernottosay</th><th>sexuality_undisclosed</th></tr>`;
+    var _defaultHeaders = `<tr><th>published</th><th>organisation</th><th>employees</th><th>carer_yes</th><th>carer_no</th><th>carer_prefernottosay</th><th>carer_undisclosed</th><th>disability_yes</th><th>disability_no</th><th>disability_prefernottosay</th><th>disability_undisclosed</th><th>ethnicity_asian</th><th>ethnicity_black</th><th>ethnicity_mixed</th><th>ethnicity_other</th><th>ethnicity_white</th><th>ethnicity_prefernottosay</th><th>ethnicity_undisclosed</th><th>gender_female</th><th>gender_male</th></tr>`;
+    var _defaultRows = `<tr><td>2020-07-30</td><td>University of Leeds</td><td>9239</td><td>2495</td><td>4250</td><td>646</td><td>1848</td><td>555</td><td>7206</td><td>739</td><td>739</td><td>647</td><td>185</td><td>185</td><td>92</td><td>6653</td><td>740</td><td>647</td><td>5081</td><td>4158</td></tr>
+`;
+    var _allRows = `<tr><td>2020-07-30</td><td>University of Leeds</td><td>9239</td><td>2495</td><td>4250</td><td>646</td><td>1848</td><td>555</td><td>7206</td><td>739</td><td>739</td><td>647</td><td>185</td><td>185</td><td>92</td><td>6653</td><td>740</td><td>647</td><td>5081</td><td>4158</td><td>92</td><td>2125</td><td>92</td><td>92</td><td>185</td><td>3512</td><td>185</td><td>92</td><td>1016</td><td>1848</td><td>185</td><td>185</td><td>5913</td><td>1016</td><td>1848</td></tr>
+`;
+    var _allDataRows = `<tr><td>2020-07-30</td><td>University of Leeds</td><td>9239</td><td>2495</td><td>4250</td><td>646</td><td>1848</td><td>555</td><td>7206</td><td>739</td><td>739</td><td>647</td><td>185</td><td>185</td><td>92</td><td>6653</td><td>740</td><td>647</td><td>5081</td><td>4158</td></tr>
+`;
+    var _allDataAllCols = `<tr><td>2020-07-30</td><td>University of Leeds</td><td>9239</td><td>2495</td><td>4250</td><td>646</td><td>1848</td><td>555</td><td>7206</td><td>739</td><td>739</td><td>647</td><td>185</td><td>185</td><td>92</td><td>6653</td><td>740</td><td>647</td><td>5081</td><td>4158</td><td>92</td><td>2125</td><td>92</td><td>92</td><td>185</td><td>3512</td><td>185</td><td>92</td><td>1016</td><td>1848</td><td>185</td><td>185</td><td>5913</td><td>1016</td><td>1848</td></tr>
+`;
+
+    var showingAllCols = false;
+    var showingAllRows = false;
+
+    function openPreview() {
+        // Reset to default view each time modal opens
+        showingAllCols = false;
+        showingAllRows = false;
+        document.getElementById('previewHead').innerHTML = _defaultHeaders;
+        document.getElementById('previewBody').innerHTML = _defaultRows;
+        document.getElementById('colLabel').textContent = 'first 20';
+        document.getElementById('rowLabel').textContent = 'first 20';
+        document.getElementById('colBtn').style.display = 'inline-block';
+        document.getElementById('rowBtn').style.display = 'inline-block';
+        document.getElementById('dataModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+        document.getElementById('dataModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function closeOnOverlay(event) {
+        // Close if user clicks the dark overlay, not the modal box itself
+        if (event.target === document.getElementById('dataModal')) {
+            closePreview();
+        }
+    }
+
+    function expandCols() {
+        // Switch to all columns view
+        showingAllCols = true;
+        document.getElementById('previewHead').innerHTML = _allHeaders;
+        document.getElementById('previewBody').innerHTML =
+            showingAllRows ? _allDataAllCols : _allRows;
+        document.getElementById('colLabel').textContent = 'all';
+        document.getElementById('colBtn').style.display = 'none';
+    }
+
+    function expandRows() {
+        // Switch to all rows view
+        showingAllRows = true;
+        document.getElementById('previewBody').innerHTML =
+            showingAllCols ? _allDataAllCols : _allDataRows;
+        document.getElementById('rowLabel').textContent = 'all';
+        document.getElementById('rowBtn').style.display = 'none';
+    }
+    </script>
+
+</div>
+
+<!-- =========================================================================
+     Missingness Distribution
+     Chart.js horizontal bar chart — top 20 partial columns by missing fraction.
+     Requires internet connection to load Chart.js from CDN.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Distribution</h2>
+<div class="section-content">
+  <p style='color:#27ae60;font-weight:600;'>No partial missingness detected.</p>
+</div>
+
+<!-- =========================================================================
+     Column Profiles
+     Filterable, searchable, paginated table of per-column profiling results.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Column Profiles</h2>
+<div class="section-content">
+
+  <!-- Filter controls -->
+  <div style="display:flex;gap:12px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+
+    <!-- Filter by missingness class -->
+    <div>
+      <label for="classFilter" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Filter by class:
+      </label>
+      <select id="classFilter" onchange="filterTable()"
+              style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                     font-size:0.85em;background:#fff;">
+        <option value="all">All columns</option>
+        <option value="structural">Structural</option>
+        <option value="partial">Partial</option>
+        <option value="complete">Complete</option>
+      </select>
+    </div>
+
+    <!-- Search by column name — case insensitive -->
+    <div>
+      <label for="colSearch" style="font-size:0.85em;color:#666;margin-right:6px;">
+        Search column:
+      </label>
+      <input id="colSearch" type="text" oninput="filterTable()"
+             placeholder="e.g. Library, Date..."
+             style="padding:6px 10px;border:1px solid #ddd;border-radius:4px;
+                    font-size:0.85em;width:200px;"/>
+    </div>
+
+    <!-- Row count indicator and show-all button -->
+    <div id="rowCount" style="font-size:0.82em;color:#999;margin-left:auto;"></div>
+    <button id="showAllBtn" onclick="showAll()"
+            style="display:none;padding:6px 14px;background:#2c3e50;color:#fff;
+                   border:none;border-radius:4px;font-size:0.82em;cursor:pointer;">
+      Show all columns
+    </button>
+  </div>
+
+  <!-- Column profiles table -->
+  <table id="profileTable">
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Missing</th>
+        <th>Class</th>
+        <th>Unique</th>
+        <th>Constant?</th>
+        <th>Sentinel Flags</th>
+        <th>Example Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>published</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">text</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>2020-07-30</td></tr>
+<tr><td>organisation</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">text</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>University of Leeds</td></tr>
+<tr><td>employees</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>9239</td></tr>
+<tr><td>carer_yes</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>2495</td></tr>
+<tr><td>carer_no</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>4250</td></tr>
+<tr><td>carer_prefernottosay</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>646</td></tr>
+<tr><td>carer_undisclosed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1848</td></tr>
+<tr><td>disability_yes</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>555</td></tr>
+<tr><td>disability_no</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>7206</td></tr>
+<tr><td>disability_prefernottosay</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>739</td></tr>
+<tr><td>disability_undisclosed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>739</td></tr>
+<tr><td>ethnicity_asian</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>647</td></tr>
+<tr><td>ethnicity_black</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>ethnicity_mixed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>ethnicity_other</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>92</td></tr>
+<tr><td>ethnicity_white</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>6653</td></tr>
+<tr><td>ethnicity_prefernottosay</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>740</td></tr>
+<tr><td>ethnicity_undisclosed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>647</td></tr>
+<tr><td>gender_female</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>5081</td></tr>
+<tr><td>gender_male</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>4158</td></tr>
+<tr><td>religion_buddhist</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>92</td></tr>
+<tr><td>religion_christian</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>2125</td></tr>
+<tr><td>religion_hindu</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>92</td></tr>
+<tr><td>religion_jewish</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>92</td></tr>
+<tr><td>religion_muslim</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>religion_no</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>3512</td></tr>
+<tr><td>religion_other</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>religion_sikh</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>92</td></tr>
+<tr><td>religion_prefernottosay</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1016</td></tr>
+<tr><td>religion_undisclosed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1848</td></tr>
+<tr><td>sexuality_bisexual</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>sexuality_gaylesbian</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>185</td></tr>
+<tr><td>sexuality_straight</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>5913</td></tr>
+<tr><td>sexuality_prefernottosay</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1016</td></tr>
+<tr><td>sexuality_undisclosed</td><td><span style="background:#2c3e50;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">numeric</span></td><td>0 (0.0%)</td><td><span style="background:#27ae60;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">complete</span></td><td>1</td><td>Yes</td><td>—</td><td style='max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'>1848</td></tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- =========================================================================
+     Validation Results
+     Colour-coded list of validation errors and warnings.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Validation Results</h2>
+<div class="section-content">
+  <div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>employees</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>carer_yes</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>carer_no</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>carer_prefernottosay</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>carer_undisclosed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>disability_yes</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>disability_no</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>disability_prefernottosay</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>disability_undisclosed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_asian</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_black</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_mixed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_other</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_white</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_prefernottosay</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>ethnicity_undisclosed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>gender_female</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>gender_male</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_buddhist</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_christian</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_hindu</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_jewish</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_muslim</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_no</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_other</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_sikh</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_prefernottosay</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>religion_undisclosed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>sexuality_bisexual</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>sexuality_gaylesbian</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>sexuality_straight</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>sexuality_prefernottosay</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+<div style='margin:8px 0;padding:12px 16px;border-left:4px solid #e67e22;background:#f9f9f9;border-radius:0 4px 4px 0;'><span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.78em;font-weight:600;">WARNING</span> <strong>sexuality_undisclosed</strong> — <code style='font-size:0.82em;color:#555;'>no_constant_columns</code><br><span style='color:#444;font-size:0.9em;'>Column has only one unique value — may be uninformative or erroneous.</span></div>
+
+</div>
+
+<!-- =========================================================================
+     Missingness Summary
+     Aggregated missingness metrics across the full dataset.
+========================================================================== -->
+<h2 class="section-toggle" onclick="toggleSection(this)">Missingness Summary</h2>
+<div class="section-content">
+  <table>
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Total Nan Values</td><td>0</td></tr><tr><td>Total Blank String Values</td><td>0</td></tr><tr><td>Total Text Sentinel Values</td><td>0</td></tr><tr><td>Numeric Sentinel Flagged Cols</td><td>0</td></tr><tr><td>Columns With Any Missingness</td><td>0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- =========================================================================
+     Profiler Warnings (injected only if warnings exist)
+========================================================================== -->
+
+
+<!-- =========================================================================
+     Footer
+========================================================================== -->
+<div class="footer">Data Quality Profiling Pipeline — COMP3931 Individual Project</div>
+
+<!-- =========================================================================
+     JavaScript
+     All interactive behaviour is defined here and operates on the static
+     HTML structure above. No external JS dependencies except Chart.js
+     (loaded inline by the chart placeholder when needed).
+========================================================================== -->
+<script>
+  // -------------------------------------------------------------------------
+  // Column profiles table — filter, search, and pagination
+  // -------------------------------------------------------------------------
+
+  // Number of rows to show by default before "Show all" is clicked
+  var showAllRows = false;
+  var PAGE_SIZE = 10;
+
+  function filterTable(event) {
+    // When filters change, reset back to paginated view
+    if (event && event.type !== 'click') {
+      showAllRows = false;
+    }
+
+    var classFilter = document.getElementById('classFilter').value.toLowerCase();
+    var searchTerm = document.getElementById('colSearch').value.toLowerCase().trim();
+
+    var rows = document.querySelectorAll('#profileTable tbody tr');
+    var matchedRows = [];
+
+    // First pass — find all rows matching current filters
+    rows.forEach(function(row) {
+      var colName = row.cells[0].textContent.toLowerCase();
+      // Missingness class badge text is in the fourth cell (index 3)
+      var missClass = row.cells[3].textContent.toLowerCase().trim();
+      var matchesClass = (classFilter === 'all') || missClass.includes(classFilter);
+      var matchesSearch = (searchTerm === '') || colName.includes(searchTerm);
+
+      if (matchesClass && matchesSearch) {
+        matchedRows.push(row);
+      } else {
+        // Hide rows that don't match filters at all
+        row.style.display = 'none';
+      }
+    });
+
+    // Second pass — apply pagination to matched rows
+    var visibleCount = 0;
+    matchedRows.forEach(function(row, index) {
+      if (showAllRows || index < PAGE_SIZE) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Update row count indicator
+    document.getElementById('rowCount').textContent =
+      'Showing ' + visibleCount + ' of ' + matchedRows.length + ' matching columns';
+
+    // Show or hide the "Show all" button depending on whether pagination is active
+    var btn = document.getElementById('showAllBtn');
+    if (matchedRows.length > PAGE_SIZE && !showAllRows) {
+      btn.style.display = 'inline-block';
+      btn.textContent = 'Show all ' + matchedRows.length + ' columns';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function showAll() {
+    // Reveal all matching rows when the user clicks "Show all"
+    showAllRows = true;
+    filterTable();
+  }
+
+  // -------------------------------------------------------------------------
+  // Collapsible sections
+  // -------------------------------------------------------------------------
+
+  function toggleSection(header) {
+    // Toggle collapsed state on the h2 header element
+    header.classList.toggle('collapsed');
+    // Find the immediately following section-content div and hide/show it
+    var content = header.nextElementSibling;
+    if (content && content.classList.contains('section-content')) {
+      content.classList.toggle('hidden');
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Initialisation — run filter on page load to set initial row count
+  // -------------------------------------------------------------------------
+  window.onload = function() {
+    filterTable();
+  };
+</script>
+
+</body>
+</html>
