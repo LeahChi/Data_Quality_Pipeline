@@ -13,13 +13,16 @@ Automatically profiles CSV datasets without prior knowledge of their structure o
 - pandas, numpy (see requirements.txt)
 
 ## Installation
+## Installation
+```bash
 git clone https://github.com/LeahChi/Data_Quality_Pipeline
 cd Data_Quality_Pipeline
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
+```
 > On Windows activate with: `venv\Scripts\activate`
+
 
 ## Documentation
 Full installation and usage instructions are provided in Appendix C of the project report.
